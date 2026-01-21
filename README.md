@@ -18,11 +18,23 @@ A modular digital twin framework for batteries and electrochemical systems. Echo
 
 ## Installation
 
-Clone the repository. Install the package in editable mode. 
+Clone the repository. Install the package in editable mode.
 
 ```bash
 pip install -e .
 ```
+
+Optional extras:
+
+```bash
+pip install -e ".[dev,bdf,viz]"
+```
+
+## BDF data (preview)
+
+Echoed includes a small ingestion helper to load Battery Data Format (BDF) assets.
+Install the `bdf` extra and use `echoed.data.load_bdf` to bring datasets into
+your workflows.
 
 ### Acknowledgements
 
