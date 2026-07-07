@@ -32,14 +32,14 @@ CONTEXT_RESOURCE = "twin-envelope.context.jsonld"
 @lru_cache(maxsize=1)
 def load_schema() -> dict[str, Any]:
     """Return the packaged BTE JSON Schema."""
-    text = resources.files("battwin").joinpath("schemas", SCHEMA_RESOURCE).read_text("utf-8")
+    text = (resources.files("battwin") / "schemas" / SCHEMA_RESOURCE).read_text("utf-8")
     return json.loads(text)
 
 
 @lru_cache(maxsize=1)
 def load_context() -> dict[str, Any]:
     """Return the packaged BTE JSON-LD context (the value of ``@context``)."""
-    text = resources.files("battwin").joinpath("context", CONTEXT_RESOURCE).read_text("utf-8")
+    text = (resources.files("battwin") / "context" / CONTEXT_RESOURCE).read_text("utf-8")
     return json.loads(text)["@context"]
 
 
