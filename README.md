@@ -93,7 +93,7 @@ context, so they slot into linked-data pipelines alongside BattINFO.
 - run simulations (that's PyBaMM, BattMo, and the platforms built on them);
 - host twins or define sync/REST protocols;
 - manage fleets or tenants;
-- acquire measurement data (see [battfeed](https://github.com/DigiBatt/gleaned)
+- acquire measurement data (see [battfeed](https://github.com/DigiBatt/battfeed)
   for source→BDF collection, and the BDF toolchain for files at rest);
 - replace BattINFO, BPX, or BDF — it composes them by reference.
 
@@ -104,7 +104,7 @@ context, so they slot into linked-data pipelines alongside BattINFO.
 | [BattINFO](https://github.com/BIG-MAP/BattINFO) | semantic records the envelope references for identity/spec |
 | [BDF / batterydf](https://github.com/battery-data-alliance/battery-data-format) | time-series datasets the envelope links in `data[]` |
 | [BPX](https://github.com/FaradayInstitution/BPX) | parameter sets bound in `models[]` |
-| [battfeed](https://github.com/DigiBatt/gleaned) | collects live source data into the BDF files a twin links |
+| [battfeed](https://github.com/DigiBatt/battfeed) | collects live source data into the BDF files a twin links |
 
 ## Python support
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/DigiBatt/echoed/main/src/echoed/schemas/twin-envelope.schema.json",
+  "$id": "https://raw.githubusercontent.com/DigiBatt/battwin/main/src/battwin/schemas/twin-envelope.schema.json",
   "title": "Battery Twin Envelope",
   "description": "BTE v0.1: an immutable, exchangeable document composing identity, specification, models, state, and data links of a battery digital twin.",
   "type": "object",

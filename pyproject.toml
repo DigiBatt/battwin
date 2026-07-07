@@ -41,9 +41,9 @@ dev = [
 battwin = "battwin.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/DigiBatt/echoed"
-Repository = "https://github.com/DigiBatt/echoed"
-Issues = "https://github.com/DigiBatt/echoed/issues"
+Homepage = "https://github.com/DigiBatt/battwin"
+Repository = "https://github.com/DigiBatt/battwin"
+Issues = "https://github.com/DigiBatt/battwin/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
