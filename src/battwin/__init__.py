@@ -22,7 +22,14 @@ from .envelope import (
     new_envelope,
 )
 from .io import from_dict, load, save
-from .validate import load_context, load_schema, validate_dict, validate_file
+from .validate import (
+    load_context,
+    load_schema,
+    load_shapes,
+    shacl_problems,
+    validate_dict,
+    validate_file,
+)
 
 try:
     from importlib.metadata import version as _pkg_version
@@ -48,7 +55,9 @@ __all__ = [
     "from_dict",
     "validate_dict",
     "validate_file",
+    "shacl_problems",
     "load_schema",
     "load_context",
+    "load_shapes",
     "__version__",
 ]

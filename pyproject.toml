@@ -36,6 +36,7 @@ dev = [
   "mypy",
   "types-jsonschema",
 ]
+shacl = ["pyshacl>=0.25"]
 
 [project.scripts]
 battwin = "battwin.cli:main"
@@ -49,7 +50,7 @@ Issues = "https://github.com/DigiBatt/battwin/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-battwin = ["schemas/*.json", "context/*.jsonld", "py.typed"]
+battwin = ["schemas/*.json", "context/*.jsonld", "shapes/*.ttl", "py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,16 +1,20 @@
 """Validation of Battery Twin Envelope documents.
 
-Two layers, matching the spec:
+Three layers, matching the spec:
 
 1. **JSON Schema** (``battwin/schemas/twin-envelope.schema.json``) — the public,
    language-neutral contract. Anyone can validate an envelope without Python.
 2. **Model rules** (pydantic, :mod:`battwin.envelope`) — the reference
    implementation's stricter semantic checks (e.g. a model binding must have
    exactly one of ``source``/``inline``).
+3. **SHACL shapes** (``battwin/shapes/twin-envelope.shapes.ttl``, optional) —
+   graph-level constraints on the JSON-LD rendering, so envelopes exchanged
+   as RDF are checkable too. Requires the ``battwin[shacl]`` extra.
 
-``validate_dict``/``validate_file`` run both — plus the version-declaration
-rule of SPEC.md §3.1 (a document must declare a ``bte_version`` that defines
-every field it uses) — and return a flat list of human-readable problem
+``validate_dict``/``validate_file`` run the first two — plus the
+version-declaration rule of SPEC.md §3.1 (a document must declare a
+``bte_version`` that defines every field it uses) — and the SHACL layer when
+called with ``shacl=True``. They return a flat list of human-readable problem
 strings (empty list = valid).
 """
 
@@ -29,6 +33,15 @@ from .envelope import _JSONLD_KEYS
 
 SCHEMA_RESOURCE = "twin-envelope.schema.json"
 CONTEXT_RESOURCE = "twin-envelope.context.jsonld"
+SHAPES_RESOURCE = "twin-envelope.shapes.ttl"
+
+#: Namespaces used to shorten IRIs in SHACL problem strings (mirrors the
+#: prefixes bound in the packaged JSON-LD context).
+_NAMESPACES = (
+    ("bte", "https://w3id.org/battinfo/twin#"),
+    ("schema", "https://schema.org/"),
+    ("battinfo", "https://w3id.org/battinfo/"),
+)
 
 #: StateSnapshot fields introduced by BTE 0.1.1 (SPEC.md §3.5).
 _STATE_FIELDS_0_1_1 = ("energy_throughput_kwh", "equivalent_full_cycles")
@@ -48,8 +61,71 @@ def load_context() -> dict[str, Any]:
     return json.loads(text)["@context"]
 
 
-def validate_dict(doc: dict[str, Any]) -> list[str]:
-    """Validate a parsed envelope document; returns problems (empty = valid)."""
+@lru_cache(maxsize=1)
+def load_shapes() -> str:
+    """Return the packaged BTE SHACL shapes as Turtle text."""
+    return (resources.files("battwin") / "shapes" / SHAPES_RESOURCE).read_text("utf-8")
+
+
+def _shorten(term: Any) -> str:
+    """Compact a full IRI to a ``prefix:name`` form for problem strings."""
+    text = str(term)
+    for prefix, namespace in _NAMESPACES:
+        if text.startswith(namespace):
+            return f"{prefix}:{text[len(namespace) :]}"
+    return text
+
+
+def shacl_problems(doc: dict[str, Any]) -> list[str]:
+    """Validate the JSON-LD rendering of ``doc`` against the packaged shapes.
+
+    Plain-JSON documents are wrapped with the packaged ``@context`` (and
+    ``@id``/``@type``) first; documents that already carry ``@context`` are
+    parsed as-is. Returns problems formatted like the other layers, prefixed
+    ``shacl:``. Requires the optional dependency **pyshacl**.
+    """
+    try:
+        import pyshacl
+        from rdflib import Graph, URIRef
+        from rdflib.namespace import RDF, SH
+    except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
+        raise ImportError(
+            "SHACL validation requires the optional dependency pyshacl; "
+            'install it with: pip install "battwin[shacl]"'
+        ) from exc
+
+    if "@context" in doc:
+        jsonld = doc
+    else:
+        jsonld = {"@context": load_context(), "@type": "TwinEnvelope", **doc}
+        if isinstance(doc.get("id"), str):
+            jsonld["@id"] = doc["id"]
+
+    data_graph = Graph()
+    data_graph.parse(data=json.dumps(jsonld), format="json-ld")
+    shapes_graph = Graph()
+    shapes_graph.parse(data=load_shapes(), format="turtle")
+
+    conforms, report, _ = pyshacl.validate(data_graph, shacl_graph=shapes_graph)
+    if conforms:
+        return []
+
+    problems: list[str] = []
+    for result in report.subjects(RDF.type, SH.ValidationResult):
+        path = report.value(result, SH.resultPath)
+        focus = report.value(result, SH.focusNode)
+        where = _shorten(path) if isinstance(path, URIRef) else _shorten(focus)
+        message = report.value(result, SH.resultMessage) or "constraint violated"
+        problems.append(f"shacl: {where}: {message}")
+    return sorted(problems)
+
+
+def validate_dict(doc: dict[str, Any], *, shacl: bool = False) -> list[str]:
+    """Validate a parsed envelope document; returns problems (empty = valid).
+
+    With ``shacl=True`` the packaged SHACL shapes are also run against the
+    JSON-LD rendering (requires the ``battwin[shacl]`` extra).
+    """
     plain = {k: v for k, v in doc.items() if k not in _JSONLD_KEYS}
     if "id" not in plain and "@id" in doc:
         plain["id"] = doc["@id"]
@@ -73,6 +149,9 @@ def validate_dict(doc: dict[str, Any]) -> list[str]:
         problems.append(f"model: <root>: {exc}")
 
     problems.extend(_version_declaration_problems(plain))
+
+    if shacl:
+        problems.extend(shacl_problems(doc))
 
     return problems
 
@@ -103,12 +182,16 @@ def _version_declaration_problems(plain: dict[str, Any]) -> list[str]:
     return problems
 
 
-def validate_file(path: str | Path) -> list[str]:
-    """Validate an envelope file; returns problems (empty = valid)."""
+def validate_file(path: str | Path, *, shacl: bool = False) -> list[str]:
+    """Validate an envelope file; returns problems (empty = valid).
+
+    With ``shacl=True`` the packaged SHACL shapes are also run (requires the
+    ``battwin[shacl]`` extra).
+    """
     try:
         doc = json.loads(Path(path).read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         return [f"json: not parseable: {exc}"]
     if not isinstance(doc, dict):
         return ["json: expected a JSON object at the top level"]
-    return validate_dict(doc)
+    return validate_dict(doc, shacl=shacl)

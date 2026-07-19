@@ -7,19 +7,20 @@ twin (simulation, sync, hosting) is intentionally out of scope — see SPEC.md.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from . import __version__
 from .envelope import new_envelope
 from .io import load, save
-from .validate import validate_file
+from .validate import load_context, load_schema, validate_file
 
 
 def _cmd_validate(args: argparse.Namespace) -> int:
     failed = 0
     for path in args.files:
-        problems = validate_file(path)
+        problems = validate_file(path, shacl=args.shacl)
         if problems:
             failed += 1
             print(f"INVALID  {path}")
@@ -28,6 +29,16 @@ def _cmd_validate(args: argparse.Namespace) -> int:
         else:
             print(f"ok       {path}")
     return 1 if failed else 0
+
+
+def _cmd_schema(args: argparse.Namespace) -> int:
+    print(json.dumps(load_schema(), indent=2))
+    return 0
+
+
+def _cmd_context(args: argparse.Namespace) -> int:
+    print(json.dumps({"@context": load_context()}, indent=2))
+    return 0
 
 
 def _cmd_show(args: argparse.Namespace) -> int:
@@ -84,7 +95,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("validate", help="validate envelope files against the BTE spec")
     p.add_argument("files", nargs="+")
+    p.add_argument(
+        "--shacl",
+        action="store_true",
+        help="also run the packaged SHACL shapes (requires the battwin[shacl] extra)",
+    )
     p.set_defaults(func=_cmd_validate)
+
+    p = sub.add_parser("schema", help="print the packaged BTE JSON Schema")
+    p.set_defaults(func=_cmd_schema)
+
+    p = sub.add_parser("context", help="print the packaged BTE JSON-LD context")
+    p.set_defaults(func=_cmd_context)
 
     p = sub.add_parser("show", help="print a human summary of an envelope")
     p.add_argument("file")
@@ -117,10 +139,16 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return int(args.func(args))
-    except FileNotFoundError as exc:
+    except OSError as exc:
+        # missing files, directories passed as files, unreadable paths
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except ImportError as exc:
+        # e.g. --shacl without the battwin[shacl] extra installed
         print(f"error: {exc}", file=sys.stderr)
         return 2
     except ValueError as exc:
+        # bad documents and undecodable (binary) files (UnicodeDecodeError)
         print(f"error: {exc}", file=sys.stderr)
         return 2
 

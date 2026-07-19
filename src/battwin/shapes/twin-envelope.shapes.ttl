@@ -1,0 +1,104 @@
+# SHACL shapes for the Battery Twin Envelope (BTE) — the optional third
+# validation layer (`pip install "battwin[shacl]"`, `battwin validate --shacl`).
+#
+# Scope: these shapes deliberately do NOT duplicate the JSON Schema, which
+# already enforces document structure (required fields, enums, additional
+# properties). They validate the *JSON-LD rendering* of an envelope — the
+# graph produced by `TwinEnvelope.to_jsonld()` under the packaged context —
+# so they also apply to envelopes that reach a consumer as RDF, outside any
+# JSON tooling.
+#
+# Term IRIs match the packaged context (`twin-envelope.context.jsonld`):
+# BTE terms live under the BattINFO namespace (https://w3id.org/battinfo/twin#)
+# and identity fields map to schema.org. Datetimes are typed schema:DateTime
+# by the context and must use the canonical RFC 3339 UTC 'Z' form (SPEC.md §4).
+
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <https://schema.org/> .
+@prefix bte:    <https://w3id.org/battinfo/twin#> .
+
+# --- Envelope-level shape -------------------------------------------------
+# Every twin envelope node must have an identity carrying a schema:name
+# (the JSON `identity.label`), so the twin is nameable in any RDF consumer.
+bte:TwinEnvelopeShape
+    a sh:NodeShape ;
+    sh:targetClass bte:TwinEnvelope ;
+    sh:property [
+        sh:path ( bte:identity schema:name ) ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "twin envelope identity must carry a schema:name (identity.label)" ;
+    ] .
+
+# --- State-of-charge ------------------------------------------------------
+# Targets every subject carrying bte:stateOfCharge: state snapshots AND
+# model validity windows (SPEC.md §3.4/§3.5 — SoC is a fraction in both),
+# so this is stricter than the JSON Schema, which does not bound window values.
+bte:StateOfChargeShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf bte:stateOfCharge ;
+    sh:property [
+        sh:path bte:stateOfCharge ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 1 ;
+        sh:message "bte:stateOfCharge must be a number in [0, 1]" ;
+    ] .
+
+# --- State-of-health ------------------------------------------------------
+bte:StateOfHealthShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf bte:stateOfHealth ;
+    sh:property [
+        sh:path bte:stateOfHealth ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 1.5 ;
+        sh:message "bte:stateOfHealth must be a number in [0, 1.5]" ;
+    ] .
+
+# --- Lifetime counters ----------------------------------------------------
+# Cumulative quantities can never be negative (SPEC.md §3.5).
+bte:EnergyThroughputShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf bte:energyThroughputKilowattHour ;
+    sh:property [
+        sh:path bte:energyThroughputKilowattHour ;
+        sh:minInclusive 0 ;
+        sh:message "bte:energyThroughputKilowattHour must be a non-negative number" ;
+    ] .
+
+bte:EquivalentFullCyclesShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf bte:equivalentFullCycles ;
+    sh:property [
+        sh:path bte:equivalentFullCycles ;
+        sh:minInclusive 0 ;
+        sh:message "bte:equivalentFullCycles must be a non-negative number" ;
+    ] .
+
+# --- Canonical datetimes --------------------------------------------------
+# The context types bte:asOf, schema:dateCreated, and bte:versionTimestamp
+# as schema:DateTime; SPEC.md §4 requires the canonical RFC 3339 UTC 'Z'
+# form. Datatype catches values that were not strings in the JSON (e.g. a
+# bare number for as_of); the pattern catches offset/naive timestamps.
+bte:CanonicalDateTimeShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf bte:asOf, schema:dateCreated, bte:versionTimestamp ;
+    sh:property [
+        sh:path bte:asOf ;
+        sh:datatype schema:DateTime ;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" ;
+        sh:message "bte:asOf must be a schema:DateTime in canonical RFC 3339 UTC 'Z' form" ;
+    ] ;
+    sh:property [
+        sh:path schema:dateCreated ;
+        sh:datatype schema:DateTime ;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" ;
+        sh:message "schema:dateCreated must be a schema:DateTime in canonical RFC 3339 UTC 'Z' form" ;
+    ] ;
+    sh:property [
+        sh:path bte:versionTimestamp ;
+        sh:datatype schema:DateTime ;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" ;
+        sh:message "bte:versionTimestamp must be a schema:DateTime in canonical RFC 3339 UTC 'Z' form" ;
+    ] .

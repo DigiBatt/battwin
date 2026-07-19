@@ -60,3 +60,41 @@ def test_diff_intact_and_broken_chain(tmp_path: Path, capsys) -> None:
 def test_missing_file_is_a_clean_error(capsys) -> None:
     assert main(["show", "no-such-file.twin.json"]) == 2
     assert "error:" in capsys.readouterr().err
+
+
+def test_schema_command_prints_packaged_schema(capsys) -> None:
+    assert main(["schema"]) == 0
+    schema = json.loads(capsys.readouterr().out)
+    assert schema["title"] == "Battery Twin Envelope"
+
+
+def test_context_command_prints_packaged_context(capsys) -> None:
+    assert main(["context"]) == 0
+    doc = json.loads(capsys.readouterr().out)
+    assert doc["@context"]["bte"] == "https://w3id.org/battinfo/twin#"
+
+
+def test_validate_directory_is_a_clean_error(tmp_path: Path, capsys) -> None:
+    assert main(["validate", str(tmp_path)]) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("error:")
+    assert err.strip().count("\n") == 0  # one line, no traceback
+
+
+def test_validate_binary_file_is_a_clean_error(tmp_path: Path, capsys) -> None:
+    binary = tmp_path / "not-json.bin"
+    binary.write_bytes(b"\x89PNG\r\n\x1a\n\x00\xff\xfe\x00garbage")
+    assert main(["validate", str(binary)]) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("error:")
+    assert err.strip().count("\n") == 0  # one line, no traceback
+
+
+def test_diff_different_twins_reported(tmp_path: Path, capsys) -> None:
+    a, b = tmp_path / "a.twin.json", tmp_path / "b.twin.json"
+    assert main(["init", "--label", "Cell A", "--id", "urn:bte:cell-a", "-o", str(a)]) == 0
+    assert main(["init", "--label", "Cell B", "--id", "urn:bte:cell-b", "-o", str(b)]) == 0
+    capsys.readouterr()
+
+    assert main(["diff", str(a), str(b)]) == 1
+    assert "different twins" in capsys.readouterr().out

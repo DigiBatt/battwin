@@ -26,7 +26,9 @@ concern. The full format is defined in [SPEC.md](SPEC.md).
 pip install battwin
 ```
 
-Dependencies: `pydantic` and `jsonschema` — nothing else.
+Dependencies: `pydantic` and `jsonschema` — nothing else. The optional
+`battwin[shacl]` extra (pyshacl) adds a third, SHACL-based validation layer
+over the JSON-LD rendering.
 
 ## Quickstart
 
@@ -62,9 +64,15 @@ And from the command line:
 ```bash
 battwin init --label "Bench cell 001" --chemistry LFP -o cell.twin.json
 battwin validate cell.twin.json
+battwin validate --shacl cell.twin.json         # + SHACL shapes layer (battwin[shacl])
 battwin show cell.twin.json
 battwin diff cell.twin.json cell.v2.twin.json   # checks the version chain
+battwin schema                                  # print the packaged JSON Schema
+battwin context                                 # print the packaged JSON-LD context
 ```
+
+`battwin schema` and `battwin context` print the language-neutral contracts to
+stdout, so non-Python consumers can pull them without touching the SDK.
 
 ## What's in an envelope
 
@@ -88,7 +96,9 @@ under namespaced keys — see SPEC.md §3.8.
 
 A complete example lives at [examples/cr2032.twin.json](examples/cr2032.twin.json).
 Envelopes also render as JSON-LD (`save(..., jsonld=True)`) using the packaged
-context, so they slot into linked-data pipelines alongside BattINFO.
+context, so they slot into linked-data pipelines alongside BattINFO — and with
+the `battwin[shacl]` extra installed, `battwin validate --shacl` checks that
+rendering against the packaged SHACL shapes as a third validation layer.
 
 ## Non-goals
 

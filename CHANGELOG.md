@@ -22,6 +22,18 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   `load(save(env))` is a content-hash fixed point.
 - JSON-LD context terms `bte:energyThroughputKilowattHour`,
   `bte:equivalentFullCycles`, `bte:extensions` (`@json`).
+- Optional SHACL validation layer: packaged shapes
+  (`battwin/shapes/twin-envelope.shapes.ttl`), `shacl_problems()` /
+  `load_shapes()`, `validate_dict(..., shacl=True)`, and
+  `battwin validate --shacl` — install with `pip install "battwin[shacl]"`.
+- `battwin schema` and `battwin context` print the packaged JSON Schema and
+  JSON-LD context, so non-Python consumers can pull the contracts without
+  touching the SDK.
+
+### Fixed
+
+- `battwin validate` on a directory or undecodable binary file now exits 2
+  with a clean one-line error instead of a traceback.
 
 ### Changed
 
