@@ -6,6 +6,32 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Added
+
+- `python -m battwin ...` now runs the CLI, mirroring the `battwin` console
+  script (new `battwin.__main__`).
+
+### Fixed
+
+- JSON Schema `format` is now **asserted**, not merely annotated:
+  `validate_dict` / `validate_file` build the Draft 2020-12 validator with a
+  format checker, so a malformed `date-time` (`state.as_of`,
+  `provenance.created`, `version.timestamp`) or `uri` (`identity.battinfo_iri`)
+  is reported by the schema layer — closing a gap where the language-neutral
+  contract caught these but the SDK did not. The assertion stays dependency-free:
+  `date-time` / `uri` fall back to lightweight RFC 3339 / URI checks when the
+  `jsonschema[format]` extra is absent, and defer to its stricter native
+  checkers when present. Canonical UTC-`Z` datetime narrowing (SPEC §4) remains
+  the model and SHACL layers' responsibility (documented in SPEC §5).
+- The pydantic model now enforces the schema's `minLength: 1` on
+  `identity.label`, `id`, `models[].name`, and `data[].uri`, so the SDK can no
+  longer construct — nor `battwin init --label ""` write — a document its own
+  schema would reject.
+- SHACL datetime shapes no longer false-pass non-canonical fractional seconds:
+  a trailing-zero (`.500Z`) or all-zero (`.000Z`) fraction is now rejected,
+  while `.5Z`, `.123456Z`, and a fraction-less `Z` stay valid — consistently
+  across the `asOf`, `dateCreated`, and `versionTimestamp` shapes.
+
 ## [0.4.0] - 2026-07-20
 
 ### Added

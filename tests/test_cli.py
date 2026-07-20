@@ -1,6 +1,8 @@
 """CLI behavior via cli.main() (no subprocesses)."""
 
 import json
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -98,3 +100,16 @@ def test_diff_different_twins_reported(tmp_path: Path, capsys) -> None:
 
     assert main(["diff", str(a), str(b)]) == 1
     assert "different twins" in capsys.readouterr().out
+
+
+# --- FIX 4: `python -m battwin` runs the CLI like the console script -------
+
+
+def test_python_m_entrypoint_runs_cli() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "battwin", "--version"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "battwin" in result.stdout

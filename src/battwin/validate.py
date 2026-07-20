@@ -21,6 +21,8 @@ strings (empty list = valid).
 from __future__ import annotations
 
 import json
+import re
+from datetime import datetime
 from functools import lru_cache
 from importlib import resources
 from pathlib import Path
@@ -45,6 +47,74 @@ _NAMESPACES = (
 
 #: StateSnapshot fields introduced by BTE 0.1.1 (SPEC.md §3.5).
 _STATE_FIELDS_0_1_1 = ("energy_throughput_kwh", "equivalent_full_cycles")
+
+
+# --- Format assertions (SPEC.md §5) --------------------------------------
+# In JSON Schema 2020-12 ``format`` is an *annotation*: a validator only turns
+# it into an assertion when handed a format checker. The packaged schema marks
+# ``state.as_of`` / ``provenance.created`` / ``version.timestamp`` as
+# ``format: date-time`` and ``identity.battinfo_iri`` as ``format: uri``, so we
+# pass a checker to the validator — otherwise a non-Python consumer validating
+# against the contract would reject a malformed datetime or IRI that we silently
+# accept.
+#
+# ``jsonschema`` only ships checkers for a few stdlib-checkable formats;
+# ``date-time`` and ``uri`` require the optional ``jsonschema[format]`` extra
+# (rfc3339-validator / rfc3987), which battwin does NOT depend on. To keep the
+# assertion dependency-free we register lightweight fallbacks for exactly those
+# two formats, and only where the environment has not already supplied a
+# stricter checker (an install that DOES have ``jsonschema[format]`` keeps its
+# native, canonical ones).
+
+_RFC3339_DATETIME = re.compile(
+    r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])"
+    r"T([01]\d|2[0-3]):[0-5]\d:([0-5]\d|60)(\.\d+)?"
+    r"(?:[Zz]|[+-](?:[01]\d|2[0-3]):[0-5]\d)$"
+)
+
+
+def _is_rfc3339_datetime(value: object) -> bool:
+    """Whether ``value`` is a well-formed RFC 3339 date-time (schema ``date-time``).
+
+    Non-strings defer to the schema's ``type`` keyword. Canonical UTC-'Z'
+    narrowing (SPEC.md §4) is the model and SHACL layers' job, not this one:
+    here we only reject strings that are not date-times at all.
+    """
+    if not isinstance(value, str):
+        return True
+    if _RFC3339_DATETIME.match(value) is None:
+        return False
+    try:  # reject impossible calendar dates, e.g. 2026-02-30
+        datetime.strptime(value[:10], "%Y-%m-%d")
+    except ValueError:
+        return False
+    return True
+
+
+def _is_uri(value: object) -> bool:
+    """Whether ``value`` is an absolute URI/IRI (schema ``uri``): a scheme is
+    required and no whitespace is allowed. Non-strings defer to ``type``."""
+    if not isinstance(value, str):
+        return True
+    if re.match(r"^[A-Za-z][A-Za-z0-9+.\-]*:", value) is None:
+        return False
+    return re.search(r"\s", value) is None
+
+
+def _build_format_checker() -> jsonschema.FormatChecker:
+    """Draft 2020-12 checker plus dependency-free ``date-time``/``uri`` fallbacks."""
+    checker = jsonschema.FormatChecker()
+    checker.checkers = dict(jsonschema.Draft202012Validator.FORMAT_CHECKER.checkers)
+    if "date-time" not in checker.checkers:
+        checker.checks("date-time")(_is_rfc3339_datetime)
+    if "uri" not in checker.checkers:
+        checker.checks("uri")(_is_uri)
+    return checker
+
+
+#: Format checker passed to the schema validator so ``format`` is asserted, not
+#: merely annotated (see the note above).
+_FORMAT_CHECKER = _build_format_checker()
 
 
 @lru_cache(maxsize=1)
@@ -132,7 +202,7 @@ def validate_dict(doc: dict[str, Any], *, shacl: bool = False) -> list[str]:
 
     problems: list[str] = []
 
-    validator = jsonschema.Draft202012Validator(load_schema())
+    validator = jsonschema.Draft202012Validator(load_schema(), format_checker=_FORMAT_CHECKER)
     for error in sorted(validator.iter_errors(plain), key=lambda e: list(e.absolute_path)):
         where = "/".join(str(p) for p in error.absolute_path) or "<root>"
         problems.append(f"schema: {where}: {error.message}")

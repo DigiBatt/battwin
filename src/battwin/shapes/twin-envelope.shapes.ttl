@@ -80,25 +80,28 @@ bte:EquivalentFullCyclesShape
 # The context types bte:asOf, schema:dateCreated, and bte:versionTimestamp
 # as schema:DateTime; SPEC.md §4 requires the canonical RFC 3339 UTC 'Z'
 # form. Datatype catches values that were not strings in the JSON (e.g. a
-# bare number for as_of); the pattern catches offset/naive timestamps.
+# bare number for as_of); the pattern catches offset/naive timestamps and
+# non-canonical fractional seconds — a trailing-zero (`.500Z`) or all-zero
+# (`.000Z`) fraction is rejected, since canonical form carries no trailing
+# zero (`.5Z`, `.123456Z`, or no fraction at all).
 bte:CanonicalDateTimeShape
     a sh:NodeShape ;
     sh:targetSubjectsOf bte:asOf, schema:dateCreated, bte:versionTimestamp ;
     sh:property [
         sh:path bte:asOf ;
         sh:datatype schema:DateTime ;
-        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" ;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d*[1-9])?Z$" ;
         sh:message "bte:asOf must be a schema:DateTime in canonical RFC 3339 UTC 'Z' form" ;
     ] ;
     sh:property [
         sh:path schema:dateCreated ;
         sh:datatype schema:DateTime ;
-        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" ;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d*[1-9])?Z$" ;
         sh:message "schema:dateCreated must be a schema:DateTime in canonical RFC 3339 UTC 'Z' form" ;
     ] ;
     sh:property [
         sh:path bte:versionTimestamp ;
         sh:datatype schema:DateTime ;
-        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" ;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d*[1-9])?Z$" ;
         sh:message "bte:versionTimestamp must be a schema:DateTime in canonical RFC 3339 UTC 'Z' form" ;
     ] .

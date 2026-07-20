@@ -74,7 +74,7 @@ class _Section(BaseModel):
 class Identity(_Section):
     """What physical (or virtual) battery this twin mirrors."""
 
-    label: str = Field(description="Human-readable name of the twinned battery.")
+    label: str = Field(min_length=1, description="Human-readable name of the twinned battery.")
     manufacturer: Optional[str] = None
     model: Optional[str] = None
     serial_number: Optional[str] = None
@@ -125,7 +125,7 @@ class ModelBinding(_Section):
     """
 
     kind: Literal["bpx", "battmo", "pybamm", "custom"]
-    name: str
+    name: str = Field(min_length=1)
     source: Optional[str] = None
     inline: Optional[dict[str, Any]] = None
     solver_hint: Optional[str] = Field(
@@ -167,7 +167,9 @@ class DataLink(_Section):
     """A link to time-series or other data belonging to the twin."""
 
     kind: Literal["bdf", "feed", "other"]
-    uri: str = Field(description="Path, URL, or IRI of the dataset (e.g. a .bdf.csv file).")
+    uri: str = Field(
+        min_length=1, description="Path, URL, or IRI of the dataset (e.g. a .bdf.csv file)."
+    )
     role: Optional[str] = Field(
         default=None, description="e.g. 'cycling', 'field', 'reference', 'characterization'."
     )
@@ -201,7 +203,7 @@ class TwinEnvelope(_Section):
     """
 
     bte_version: str = BTE_VERSION
-    id: str = Field(description="Stable identifier of the twin (URN or IRI).")
+    id: str = Field(min_length=1, description="Stable identifier of the twin (URN or IRI).")
     identity: Identity
     specification: Optional[Specification] = None
     models: list[ModelBinding] = Field(default_factory=list)

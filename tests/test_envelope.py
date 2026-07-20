@@ -8,6 +8,8 @@ import pytest
 from pydantic import ValidationError
 
 from battwin import (
+    DataLink,
+    Identity,
     ModelBinding,
     StateSnapshot,
     TwinEnvelope,
@@ -152,3 +154,39 @@ def test_envelope_and_sections_are_frozen() -> None:
     assert env.state is not None
     with pytest.raises(ValidationError):
         env.state.state_of_charge = 0.1  # type: ignore[misc]
+
+
+# --- FIX 2: minLength:1 fields reject the empty string --------------------
+# identity.label, id, models[].name, data[].uri are `minLength: 1` in the JSON
+# Schema; the model now matches it, so the SDK can no longer emit a document its
+# own schema rejects.
+
+
+def test_minlength_fields_reject_empty_string_at_model_level() -> None:
+    with pytest.raises(ValidationError):
+        Identity(label="")
+    with pytest.raises(ValidationError):
+        ModelBinding(kind="custom", name="", inline={"a": 1})
+    with pytest.raises(ValidationError):
+        DataLink(kind="bdf", uri="")
+    doc = load(EXAMPLE).to_dict()
+    doc["id"] = ""
+    with pytest.raises(ValidationError):
+        TwinEnvelope.model_validate(doc)
+
+
+def test_minlength_fields_reject_empty_string_via_validate_dict() -> None:
+    assert validate_dict(load(EXAMPLE).to_dict()) == []  # example still validates
+    for path in (("identity", "label"), ("id",), ("models", 0, "name"), ("data", 0, "uri")):
+        doc = load(EXAMPLE).to_dict()
+        target: object = doc
+        for key in path[:-1]:
+            target = target[key]  # type: ignore[index]
+        target[path[-1]] = ""  # type: ignore[index]
+        problems = validate_dict(doc)
+        assert any(p.startswith("model:") for p in problems), f"model layer must flag empty {path}"
+
+
+def test_init_empty_label_fails_at_construction() -> None:
+    with pytest.raises(ValidationError):
+        new_envelope(label="")

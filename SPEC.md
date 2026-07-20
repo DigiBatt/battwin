@@ -181,6 +181,12 @@ windows; version-chain rules when a predecessor is available).
 The reference SDK (`pip install battwin`) implements both layers:
 `battwin validate <file>`.
 
+The JSON Schema's `format: date-time` asserts only that a value is a
+well-formed RFC 3339 date-time; the **canonical** UTC-`Z` datetime form of §4
+is authoritative in the reference model layer (which normalizes datetimes when
+serializing) and is additionally asserted, for RDF renderings, by the optional
+SHACL layer.
+
 ## 6. JSON-LD rendering
 
 Adding `"@context"` (the context published with this spec), `"@id"` (= `id`)

@@ -69,3 +69,33 @@ def test_unparseable_file_reported(tmp_path: Path) -> None:
     bad.write_text("{not json", encoding="utf-8")
     problems = validate_file(bad)
     assert problems and problems[0].startswith("json:")
+
+
+# --- FIX 1: schema-layer format assertions (date-time / uri) --------------
+# The packaged schema marks datetime fields `format: date-time` and
+# `identity.battinfo_iri` `format: uri`. Those are asserted by validate_dict's
+# schema layer (a strict non-Python consumer catches them too), not only SHACL.
+
+
+def test_malformed_created_reported_by_schema_layer() -> None:
+    doc = _example_doc()
+    doc["provenance"]["created"] = "not-a-datetime"
+    problems = validate_dict(doc)
+    assert any(p.startswith("schema:") and "created" in p and "date-time" in p for p in problems)
+
+
+def test_malformed_as_of_reported_by_schema_layer() -> None:
+    doc = _example_doc()
+    doc["state"]["as_of"] = "2026-13-99T99:99:99Z"  # not a real calendar datetime
+    problems = validate_dict(doc)
+    assert any(p.startswith("schema:") and "as_of" in p and "date-time" in p for p in problems)
+
+
+def test_malformed_battinfo_iri_reported_by_schema_layer() -> None:
+    # battinfo_iri is the only `format: uri` field and pydantic leaves it a bare
+    # string, so a schema-layer hit proves format is asserted, not just annotated.
+    doc = _example_doc()
+    doc["identity"]["battinfo_iri"] = "not a uri"
+    problems = validate_dict(doc)
+    assert any(p.startswith("schema:") and "battinfo_iri" in p and "uri" in p for p in problems)
+    assert not any(p.startswith("model:") and "battinfo_iri" in p for p in problems)

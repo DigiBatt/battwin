@@ -145,3 +145,28 @@ def test_cli_shacl_without_extra_is_a_clean_error(monkeypatch, capsys) -> None:
     err = capsys.readouterr().err
     assert err.startswith("error:")
     assert "battwin[shacl]" in err
+
+
+# --- FIX 3: SHACL rejects non-canonical trailing-zero datetimes -----------
+# Canonical RFC 3339 UTC form (SPEC §4) carries no trailing fractional zero, so
+# `.500Z` and `.000Z` are non-canonical while `.5Z`, `.123456Z`, and a plain
+# `Z` (no fraction) are canonical.
+
+
+@needs_pyshacl
+@pytest.mark.parametrize("bad", ["2026-07-07T12:00:00.500Z", "2026-07-07T12:00:00.000Z"])
+def test_trailing_zero_datetime_reported(bad: str) -> None:
+    doc = _example_doc()
+    doc["state"]["as_of"] = bad
+    problems = validate_dict(doc, shacl=True)
+    assert any(p.startswith("shacl:") and "asOf" in p for p in problems)
+
+
+@needs_pyshacl
+@pytest.mark.parametrize(
+    "good", ["2026-07-07T12:00:00.5Z", "2026-07-07T12:00:00.123456Z", "2026-07-07T12:00:00Z"]
+)
+def test_canonical_fractional_datetime_passes(good: str) -> None:
+    doc = _example_doc()
+    doc["state"]["as_of"] = good
+    assert validate_dict(doc, shacl=True) == []
