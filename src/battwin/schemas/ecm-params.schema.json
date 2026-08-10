@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/emmo/domain/equivalent-circuit-model/schema/ecm-params/0.1",
+  "title": "ECM Parameter Set (ECM-PS)",
+  "description": "Open, self-describing exchange format for equivalent-circuit-model parameters. A document, not an engine: it carries the values, not a simulation run. Semantically typed against emmo/domain/equivalent-circuit-model; losslessly mappable to the PyBaMM/PyBOP ECM parameter namespace. DRAFT 0.1 -- $id namespace pending the w3id/EMMO decision.",
+  "type": "object",
+  "required": ["ecm_ps_version", "profile", "topology", "cell", "parameters", "conventions"],
+  "additionalProperties": false,
+  "properties": {
+    "ecm_ps_version": { "const": "0.1" },
+
+    "profile": {
+      "type": "string",
+      "format": "uri",
+      "description": "IRI of the ECM profile / ontology class this set parameterises, e.g. https://w3id.org/emmo/domain/equivalent-circuit-model#TheveninEquivalentCircuitModel. Fixes topology + governing equations so a solver need not re-derive them."
+    },
+
+    "topology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rc_branches"],
+      "properties": {
+        "rc_branches": { "type": "integer", "minimum": 0, "description": "Number of R||C branches. Maps to PyBaMM option 'number of rc elements'." },
+        "hysteresis": { "enum": ["none", "one-state"], "default": "none", "description": "OCV hysteresis model. 'one-state' = About:Energy gamma-decay h-state. PyBaMM basic Thevenin is 'none'." },
+        "entropic": { "type": "boolean", "default": false, "description": "Whether an entropic coefficient (dU/dT) is provided. Maps to PyBaMM 'Entropic change [V/K]'." },
+        "diffusion": { "type": "boolean", "default": false, "description": "Optional Warburg-like diffusion element. Maps to PyBaMM 'Diffusion time constant [s]' + diffusion-element option." }
+      }
+    },
+
+    "conventions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_sign", "soc_definition"],
+      "properties": {
+        "current_sign": {
+          "enum": ["positive_charge", "positive_discharge"],
+          "description": "Sign of cell current. 'positive_charge' matches BDF/battfeed and the About:Energy SOC integral. PyBaMM's 'Current function [A]' is load-positive (discharge); exporters MUST flip sign accordingly."
+        },
+        "soc_definition": { "enum": ["fraction_0_1"], "default": "fraction_0_1", "description": "SOC as a 0..1 fraction (BTE/PyBaMM convention; never percent)." },
+        "temperature_reference": { "type": "string", "description": "e.g. 'cell surface' / 'core'; free text." }
+      }
+    },
+
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nominal_capacity_ampere_hour"],
+      "properties": {
+        "nominal_capacity_ampere_hour": { "type": "number", "exclusiveMinimum": 0, "description": "Q_nom. Maps to PyBaMM 'Nominal cell capacity [A.h]' and 'Cell capacity [A.h]'." },
+        "upper_cutoff_voltage_volt": { "type": "number", "description": "V_EOC. -> PyBaMM 'Upper voltage cut-off [V]'." },
+        "lower_cutoff_voltage_volt": { "type": "number", "description": "V_EOD. -> PyBaMM 'Lower voltage cut-off [V]'." },
+        "battinfo_record": { "type": "string", "format": "uri", "description": "IRI of the BattINFO cell / cell-spec record this ECM abstracts." }
+      }
+    },
+
+    "degradation": {
+      "type": "object",
+      "description": "SOH overlays applied MULTIPLICATIVELY at evaluation time. BoL tables in 'parameters' stay unscaled.",
+      "additionalProperties": false,
+      "properties": {
+        "capacity_retention_factor": { "$ref": "#/$defs/factor", "description": "lambda_deg_Q: effective capacity = Q_nom * factor." },
+        "series_resistance_growth_factor": { "$ref": "#/$defs/factor", "description": "lambda_deg_R0: applied to R0 only (About:Energy convention); other elements unscaled unless stated." }
+      }
+    },
+
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation", "independent_variables", "columns", "table"],
+      "properties": {
+        "representation": { "enum": ["lookup", "polynomial", "analytic"], "description": "How each parameter varies over the independent variables. 'lookup' = gridded table (the common case)." },
+        "independent_variables": {
+          "type": "array",
+          "minItems": 0,
+          "items": { "$ref": "#/$defs/axis" },
+          "description": "Ordered grid axes. Typically [state_of_charge, temperature_degc]; add current_ampere for PyBaMM-style 3D R/C lookups."
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/column" },
+          "description": "Declares each dependent parameter column: name, unit, element role, RC branch index, and PyBaMM parameter name."
+        },
+        "table": {
+          "description": "The gridded values. Inline (array of rows keyed by axis+column names) for small sets, or a reference to a BDF-style tabular artifact (.bdf.csv / .parquet) for real ones.",
+          "oneOf": [
+            { "type": "string", "format": "uri-reference", "description": "Path/IRI of a BDF-convention table; one row per grid point, columns named exactly as axes + columns above." },
+            { "type": "array", "items": { "type": "object" }, "description": "Inline rows; each key is an axis name or a column name." }
+          ]
+        }
+      }
+    },
+
+    "thermal": {
+      "type": "object",
+      "description": "OPTIONAL lumped thermal network (pack/jig concern, not a cell electrical parameter). Present only to make a complete PyBaMM export possible.",
+      "additionalProperties": false,
+      "properties": {
+        "cell_thermal_mass_joule_per_kelvin": { "type": "number" },
+        "cell_jig_heat_transfer_coefficient_watt_per_kelvin": { "type": "number" },
+        "jig_thermal_mass_joule_per_kelvin": { "type": "number" },
+        "jig_air_heat_transfer_coefficient_watt_per_kelvin": { "type": "number" }
+      }
+    },
+
+    "initial_conditions": {
+      "type": "object",
+      "description": "OPTIONAL simulation state, NOT cell parameters. Excluded from the semantic 'cell parameter' payload by design.",
+      "additionalProperties": true
+    },
+
+    "identification": {
+      "type": "object",
+      "description": "OPTIONAL per-parameter fitting metadata, making this document a first-class PyBOP source/target. Keys are column names.",
+      "additionalProperties": { "$ref": "#/$defs/fit_spec" }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "source": { "type": "string" },
+        "method": { "type": "string", "description": "e.g. 'GITT + pulse fit', 'PyBOP MAP estimation'." },
+        "created": { "type": "string", "format": "date-time" },
+        "created_by": { "type": "string" },
+        "cell_tested": { "type": "string" },
+        "references": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+
+  "$defs": {
+    "factor": {
+      "oneOf": [
+        { "type": "number", "exclusiveMinimum": 0 },
+        { "type": "object", "required": ["from_state"], "additionalProperties": false,
+          "properties": { "from_state": { "enum": ["state_of_health"], "description": "Derive the factor from the envelope's state.state_of_health at evaluation time." } } }
+      ]
+    },
+    "axis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "unit"],
+      "properties": {
+        "name": { "enum": ["state_of_charge", "temperature_degc", "temperature_kelvin", "current_ampere"] },
+        "unit": { "enum": ["dimensionless", "degreeCelsius", "kelvin", "ampere"] },
+        "quantity": { "type": "string", "format": "uri", "description": "EMMO/BattINFO quantity IRI, e.g. battinfo StateOfCharge / Temperature / ElectricCurrent." },
+        "values": { "type": "array", "items": { "type": "number" }, "description": "Explicit grid points (monotonic)." },
+        "range": { "type": "object", "properties": { "min": { "type": "number" }, "max": { "type": "number" }, "n": { "type": "integer" } } }
+      }
+    },
+    "column": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "unit", "role"],
+      "properties": {
+        "name": { "type": "string", "description": "BDF-convention {quantity}_{unit} snake_case, e.g. series_resistance_ohm, polarization_resistance_1_ohm, polarization_capacitance_1_farad, ocv_charge_volt, ocv_discharge_volt, entropic_coefficient_volt_per_kelvin, hysteresis_decay_rate_dimensionless." },
+        "unit": { "type": "string", "description": "ohm | farad | volt | volt_per_kelvin | dimensionless | second." },
+        "role": {
+          "enum": ["series_resistance", "polarization_resistance", "polarization_capacitance", "ocv", "ocv_charge", "ocv_discharge", "entropic_coefficient", "hysteresis_decay", "diffusion_time_constant"],
+          "description": "Semantic role; maps to an emmo/domain/equivalent-circuit-model class."
+        },
+        "branch_index": { "type": "integer", "minimum": 1, "description": "RC branch number for polarization_resistance/polarization_capacitance." },
+        "quantity": { "type": "string", "format": "uri", "description": "EMMO quantity IRI (Resistance/Capacitance/Voltage/EntropicCoefficient)." },
+        "pybamm_name": { "type": "string", "description": "Exact PyBaMM parameter string, e.g. 'R0 [Ohm]', 'C1 [F]', 'Open-circuit voltage [V]', 'Entropic change [V/K]'." }
+      }
+    },
+    "fit_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bounds": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "prior": { "type": "string", "description": "e.g. 'Gaussian(mu, sigma)', 'Uniform'." },
+        "initial_value": { "type": "number" },
+        "identifiable": { "type": "boolean" }
+      }
+    }
+  }
+}

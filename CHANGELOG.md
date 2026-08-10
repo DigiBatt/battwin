@@ -8,6 +8,18 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
+- ECM Parameter Set (ECM-PS) validation: battwin now packages the draft
+  ECM-PS JSON Schema (`battwin/schemas/ecm-params.schema.json`, validation
+  only -- battwin still never executes models) with a small API:
+  `battwin.ecm.ecm_ps_problems()` / `validate_ecm_ps_file()` /
+  `load_ecm_schema()`. An ECM-PS document carries equivalent-circuit-model
+  parameters (topology, conventions, cell limits, lookup table) for
+  attachment to a twin via a model binding; the format is co-developed with
+  the EMMO domain-equivalent-circuit-model work and its `$id` is provisional
+  until the w3id redirects land. Exercised against the About:Energy Molicel
+  INR21700-P45B parameter release (Zenodo 10.5281/zenodo.19052626,
+  CC-BY-4.0).
+
 - Twin a cell straight from its BattINFO IRI: `battwin init --from-battinfo
   <IRI>` (and `battwin.envelope_from_battinfo()`) dereferences the registry
   record and seeds `identity` and `specification` from it, with
