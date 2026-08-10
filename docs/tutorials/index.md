@@ -1,6 +1,6 @@
 # Tutorials
 
-Learning-oriented lessons that take you from nothing to a working result, step by step. Follow them in order if you are new to battwin.
+Learning-oriented lessons that take you from nothing to a working result. The two tutorials tell one continuous story: a digital twin of a real cell, the Molicel INR21700-P45B, built from its live BattINFO registry record, bound to an openly licensed equivalent-circuit model, simulated in PyBaMM, and versioned with a verifiable hash chain at every step. Every command's real output is shown along the way.
 
 ```{toctree}
 :maxdepth: 1

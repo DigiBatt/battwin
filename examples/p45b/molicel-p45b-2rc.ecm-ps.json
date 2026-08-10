@@ -1,0 +1,115 @@
+{
+  "ecm_ps_version": "0.1",
+  "profile": "https://w3id.org/emmo/domain/equivalent-circuit-model#TheveninEquivalentCircuitModel",
+  "topology": {
+    "rc_branches": 2,
+    "hysteresis": "one-state",
+    "entropic": true,
+    "diffusion": false
+  },
+  "conventions": {
+    "current_sign": "positive_charge",
+    "soc_definition": "fraction_0_1",
+    "temperature_reference": "cell surface"
+  },
+  "cell": {
+    "nominal_capacity_ampere_hour": 4.5,
+    "upper_cutoff_voltage_volt": 4.2,
+    "lower_cutoff_voltage_volt": 2.5,
+    "battinfo_record": "https://w3id.org/battinfo/spec/ycek-4qa3-d4v3-rm6r"
+  },
+  "parameters": {
+    "representation": "lookup",
+    "independent_variables": [
+      {
+        "name": "state_of_charge",
+        "unit": "dimensionless",
+        "quantity": "https://w3id.org/battinfo#StateOfCharge",
+        "range": {
+          "min": -0.0100424868644091,
+          "max": 1.0
+        }
+      },
+      {
+        "name": "temperature_degc",
+        "unit": "degreeCelsius",
+        "quantity": "https://w3id.org/battinfo#Temperature",
+        "values": [
+          10.0,
+          25.0,
+          40.0,
+          60.0
+        ]
+      }
+    ],
+    "columns": [
+      {
+        "name": "ocv_charge_volt",
+        "unit": "volt",
+        "role": "ocv_charge",
+        "pybamm_name": "Open-circuit voltage [V]"
+      },
+      {
+        "name": "ocv_discharge_volt",
+        "unit": "volt",
+        "role": "ocv_discharge",
+        "pybamm_name": "Open-circuit voltage [V]"
+      },
+      {
+        "name": "series_resistance_ohm",
+        "unit": "ohm",
+        "role": "series_resistance",
+        "pybamm_name": "R0 [Ohm]"
+      },
+      {
+        "name": "polarization_resistance_1_ohm",
+        "unit": "ohm",
+        "role": "polarization_resistance",
+        "branch_index": 1,
+        "pybamm_name": "R1 [Ohm]"
+      },
+      {
+        "name": "polarization_capacitance_1_farad",
+        "unit": "farad",
+        "role": "polarization_capacitance",
+        "branch_index": 1,
+        "pybamm_name": "C1 [F]"
+      },
+      {
+        "name": "polarization_resistance_2_ohm",
+        "unit": "ohm",
+        "role": "polarization_resistance",
+        "branch_index": 2,
+        "pybamm_name": "R2 [Ohm]"
+      },
+      {
+        "name": "polarization_capacitance_2_farad",
+        "unit": "farad",
+        "role": "polarization_capacitance",
+        "branch_index": 2,
+        "pybamm_name": "C2 [F]"
+      },
+      {
+        "name": "hysteresis_decay_rate_dimensionless",
+        "unit": "dimensionless",
+        "role": "hysteresis_decay"
+      },
+      {
+        "name": "entropic_coefficient_volt_per_kelvin",
+        "unit": "volt_per_kelvin",
+        "role": "entropic_coefficient",
+        "pybamm_name": "Entropic change [V/K]"
+      }
+    ],
+    "table": "molicel-p45b-2rc.params.ecm.csv"
+  },
+  "provenance": {
+    "source": "https://doi.org/10.5281/zenodo.19052626",
+    "method": "About:Energy industry-standard ECM parameterisation (base parameter set; see the related publication)",
+    "created_by": "Converted from the About:Energy data release (CC-BY-4.0) by battwin tooling",
+    "cell_tested": "Molicel INR21700-P45B",
+    "references": [
+      "About:Energy Ltd, Data Release - Industry-Standard Parameter Set, Validation Data and Validation Reporting for an Equivalent Circuit Model of the Molicel INR21700-P45B Cylindrical Cell, Zenodo, DOI 10.5281/zenodo.19052626 (CC-BY-4.0)"
+    ]
+  }
+}

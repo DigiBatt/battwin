@@ -96,7 +96,10 @@ stdout, so non-Python consumers can pull them without touching the SDK.
 Vendor- or tool-specific facts that aren't (yet) canonical go in `extensions`
 under namespaced keys — see SPEC.md §3.8.
 
-A complete example lives at [examples/cr2032.twin.json](examples/cr2032.twin.json).
+A complete example lives at [examples/cr2032.twin.json](examples/cr2032.twin.json),
+and [examples/p45b/](examples/p45b/) carries an openly licensed ECM parameter set
+for the Molicel INR21700-P45B used by the
+[hands-on tutorials](https://digibatt.github.io/battwin/tutorials/).
 Envelopes also render as JSON-LD (`save(..., jsonld=True)`) using the packaged
 context, so they slot into linked-data pipelines alongside BattINFO — and with
 the `battwin[shacl]` extra installed, `battwin validate --shacl` checks that
