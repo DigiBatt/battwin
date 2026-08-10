@@ -12,14 +12,13 @@ pip install "battwin[sim,shacl]"
 
 This pulls in PyBaMM (and pyshacl, used in step 4). PyBaMM includes opt-out usage telemetry; set `PYBAMM_DISABLE_TELEMETRY=true` in your environment if you do not want simulation runs reported.
 
-## 2. Get the model files
+## 2. Get the model file
 
-Copy the two files from [`examples/p45b/`](https://github.com/DigiBatt/battwin/tree/main/examples/p45b) into your working directory (next to `p45b.v2.twin.json` from the previous tutorial):
+Copy [`molicel-p45b-2rc.ecm-ps.json`](https://github.com/DigiBatt/battwin/blob/main/examples/p45b/molicel-p45b-2rc.ecm-ps.json) from [`examples/p45b/`](https://github.com/DigiBatt/battwin/tree/main/examples/p45b) into your working directory (next to `p45b.v2.twin.json` from the previous tutorial).
 
-- [`molicel-p45b-2rc.ecm-ps.json`](https://github.com/DigiBatt/battwin/blob/main/examples/p45b/molicel-p45b-2rc.ecm-ps.json) — a 2-RC Thevenin model: topology, sign conventions, cell limits, column definitions
-- [`molicel-p45b-2rc.params.ecm.csv`](https://github.com/DigiBatt/battwin/blob/main/examples/p45b/molicel-p45b-2rc.params.ecm.csv) — its lookup table: 839 rows over state of charge at 10, 25, 40, and 60 °C
+It is a single self-contained document in the draft **ECM-PS** format: a 2-RC Thevenin model whose parameters (both OCV hysteresis branches, R0, R1/C1, R2/C2, entropic coefficient) are 2-D interpolated tables over state of charge and temperature, 210 SoC points at four temperatures. If you have seen a [BPX](https://github.com/FaradayInstitution/BPX) file, the shape will feel familiar — `Header` and `Parameterisation` sections, natural-language parameter names with bracketed SI units — which is deliberate: ECM-PS is styled after BPX so the two stay as interoperable as possible, even though BPX itself has no ECM model type yet. The format details are in the [ECM-PS reference](../reference/ecm-ps.md).
 
-The parameter values come from About:Energy's data release for the INR21700-P45B ([Zenodo, 10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626), CC-BY-4.0); cite that DOI if you use them beyond this tutorial. Note the document's `cell.battinfo_record`: it names the same registry IRI your twin was scaffolded from. The model and the twin agree about which cell they describe.
+The parameter values come from About:Energy's data release for the INR21700-P45B ([Zenodo, 10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626), CC-BY-4.0); cite that DOI if you use them beyond this tutorial. Note the document's `Header` carries a `BattINFO record` IRI: the same registry IRI your twin was scaffolded from. The model and the twin agree about which cell they describe.
 
 ## 3. Attach the model as version 3
 
@@ -65,7 +64,7 @@ $ battwin validate --shacl p45b.v3.twin.json
 ok       p45b.v3.twin.json
 ```
 
-One line, but three checks passed: the JSON Schema, the model rules, and the SHACL shapes over the JSON-LD rendering, with a ~5 kB ECM document embedded inline. See [how the validation layers fit together](../explanation/validation.md).
+One line, but three checks passed: the JSON Schema, the model rules, and the SHACL shapes over the JSON-LD rendering, with the entire ECM document (about 170 kB of parameter tables) embedded inline. See [how the validation layers fit together](../explanation/validation.md).
 
 ## 5. Simulate a 1C discharge
 
@@ -81,7 +80,7 @@ from battwin.sim import build_thevenin, run_experiment
 v3 = load("p45b.v3.twin.json")
 binding = v3.models[0]
 
-build = build_thevenin(binding.inline, base_dir=".", initial_soc=1.0, ambient_celsius=25.0)
+build = build_thevenin(binding.inline, initial_soc=1.0, ambient_celsius=25.0)
 for warning in build.warnings:
     print("warning:", warning)
 
@@ -153,7 +152,7 @@ version chain: intact (b.previous == hash(a))
 
 $ battwin show p45b.v4.twin.json
 Molicel INR2170-P45B (id: urn:bte:molicel-inr2170-p45b:2026-08-10)
-  BTE 0.1.1 | version 4 <- sha256:fc0e6289086...
+  BTE 0.1.1 | version 4 <- sha256:85934980543...
   battinfo record: https://w3id.org/battinfo/spec/ycek-4qa3-d4v3-rm6r
   models: p45b-2rc-ecm (About:Energy base set) [custom]
   state (2026-08-10): SoC 0%

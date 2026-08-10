@@ -6,6 +6,7 @@ Information-oriented descriptions of battwin's machinery: the normative format d
 :maxdepth: 1
 
 specification
+ecm-ps
 cli
 api
 changelog

@@ -6,6 +6,26 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Changed (breaking, draft format)
+
+- ECM-PS draft **0.2** restyles the format after BPX for maximum
+  interoperability (decision 2026-08-10): `Header`/`Parameterisation`/`State`/
+  `Validation` sections, natural-language parameter names with bracketed
+  SI dot-notation units (`"R0 [Ohm]"`, `"Entropic change [V.K-1]"`), values
+  as constants or interpolated tables (BPX's `{x, y}` plus a minimal 2-D
+  `{x, y, z}` extension for (SoC, temperature) grids), temperatures in
+  Kelvin, and a `User-defined` extension section. Conventions (SoC 0–1
+  fraction, no executable expression strings) are fixed by the spec rather
+  than declared per file; EMMO grounding moves to spec level with an
+  optional `Header` `BattINFO record` IRI. Documents are now
+  self-contained: the external-CSV table mechanism and
+  `battwin.sim.load_table` are gone, and `build_thevenin` loses its
+  `table`/`base_dir` arguments. A `Header` field says `"ECM-PS version"`,
+  never `"BPX"`, so a file cannot falsely claim BPX conformance. ECM-PS 0.1
+  documents are not accepted; no 0.1 documents exist outside this repo.
+  `examples/p45b/` regenerated accordingly (single self-contained JSON;
+  simulation results unchanged: same 1C trajectory and RMSE vs measurement).
+
 ### Added
 
 - `examples/p45b/`: the About:Energy release for the Molicel INR21700-P45B

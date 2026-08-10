@@ -12,7 +12,7 @@ pip install "battwin[sim]"
 import json
 from battwin.sim import build_thevenin, run_experiment
 
-ecm_ps = json.load(open("cell.ecm.json"))
+ecm_ps = json.load(open("cell.ecm-ps.json"))
 build = build_thevenin(ecm_ps, initial_soc=1.0, ambient_celsius=25.0)
 for w in build.warnings:
     print("warning:", w)
@@ -29,14 +29,14 @@ columns = run_experiment(build, ["Discharge at 1C until 2.5 V"], period_s=10.0)
 Sign convention
 : Returned currents follow BDF (positive = charging); PyBaMM's load-positive sign is flipped for you.
 
-2-D lookups
-: Parameter lookups are interpolated over (temperature, SoC). Per-temperature SoC grids are resampled onto a common axis, so About:Energy-style tables with slightly different SoC points at each temperature work directly. A `current_ampere` lookup axis is not supported yet and raises a clear error.
+Values become interpolants
+: Constants pass straight through; 1-D tables become SoC interpolants; 2-D tables become (temperature, SoC) interpolants, with the document's Kelvin axis converted to the Celsius axis PyBaMM's ECM callbacks use. Expression strings are not part of [ECM-PS](../reference/ecm-ps.md) and are rejected with a clear error.
 
 Hysteresis is projected
-: PyBaMM's basic Thevenin has a single OCV, so when an ECM-PS carries charge and discharge branches, their mean is used; the branches stay untouched in the document. This and any similar simplification is surfaced in `TheveninBuild.warnings`.
+: PyBaMM's basic Thevenin has a single OCV, so when an ECM-PS carries charge and discharge branches, their mean is used (2-D branches are read at the temperature nearest ambient); the branches stay untouched in the document. This and any similar simplification is surfaced in `TheveninBuild.warnings`.
 
-Tables from disk or inline
-: `parameters.table` may be an inline row list or the name of a CSV resolved against `base_dir`; `load_table` handles both.
+Consistency is enforced at build time
+: `build_thevenin` raises a clear `ValueError` when the Circuit is missing an `R{i}`/`C{i}` pair implied by `Number of RC elements`, or when the OCV branches disagree about their SoC grid.
 
 ## Write the results back
 

@@ -1,11 +1,15 @@
 """ECM Parameter Set (ECM-PS) validation.
 
-An ECM-PS document expresses equivalent-circuit-model parameters -- topology,
-conventions, cell limits, and a lookup/functional parameter table -- in an
-open, semantically-typed form (concepts live in the EMMO
-domain-equivalent-circuit-model ontology; values live here). A twin attaches
-one through a model binding whose payload (``inline`` or the document behind
-``source``) is an ECM-PS.
+An ECM-PS document expresses equivalent-circuit-model parameters in a form
+deliberately styled after BPX (Header/Parameterisation/State/Validation
+sections, natural-language parameter names with bracketed SI units, values as
+constants or interpolated tables), so that ECM-PS reads as the ECM
+counterpart of a BPX file even though BPX itself defines no ECM model type.
+Semantic grounding lives at spec level: each defined parameter name maps to a
+class in the EMMO domain-equivalent-circuit-model ontology, and the Header
+may carry a BattINFO record IRI. A twin attaches an ECM-PS through a model
+binding whose payload (``inline`` or the document behind ``source``) is the
+document itself.
 
 battwin packages the ECM-PS JSON Schema **validation-only**: this module can
 check that a payload is a well-formed ECM-PS document, and never evaluates
@@ -42,9 +46,10 @@ def ecm_ps_problems(doc: dict[str, Any]) -> list[str]:
     """Validate a parsed ECM-PS document; returns problems (empty = valid).
 
     Problem strings follow the envelope validators' format, prefixed
-    ``ecm:``. Only schema conformance is checked -- consistency between the
-    header and an external ``parameters.table`` file is the consumer's
-    concern (the table may not be co-located, or even fetched yet).
+    ``ecm:``. Only schema conformance is checked -- cross-value consistency
+    (e.g. that every ``R{i}``/``C{i}`` up to ``Number of RC elements`` is
+    present, or that table rows are equally long) is enforced by consumers
+    such as :func:`battwin.sim.build_thevenin`.
     """
     validator = jsonschema.Draft202012Validator(load_ecm_schema(), format_checker=_FORMAT_CHECKER)
     problems = []

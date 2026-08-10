@@ -9,43 +9,37 @@ import pytest
 from battwin.ecm import ecm_ps_problems, load_ecm_schema, validate_ecm_ps_file
 
 MINIMAL_ECM_PS = {
-    "ecm_ps_version": "0.1",
-    "profile": "https://w3id.org/emmo/domain/equivalent-circuit-model#TheveninEquivalentCircuitModel",
-    "topology": {"rc_branches": 2, "hysteresis": "one-state", "entropic": True, "diffusion": False},
-    "conventions": {
-        "current_sign": "positive_charge",
-        "soc_definition": "fraction_0_1",
-        "temperature_reference": "cell surface",
+    "Header": {
+        "ECM-PS version": "0.2",
+        "Model": "ECM",
+        "Title": "Minimal 1-RC test set",
+        "BattINFO record": "https://w3id.org/battinfo/spec/ycek-4qa3-d4v3-rm6r",
     },
-    "cell": {
-        "nominal_capacity_ampere_hour": 4.5,
-        "upper_cutoff_voltage_volt": 4.2,
-        "lower_cutoff_voltage_volt": 2.5,
-        "battinfo_record": "https://w3id.org/battinfo/spec/ycek-4qa3-d4v3-rm6r",
-    },
-    "parameters": {
-        "representation": "lookup",
-        "independent_variables": [
-            {"name": "state_of_charge", "unit": "dimensionless", "range": {"min": 0.0, "max": 1.0}},
-            {"name": "temperature_degc", "unit": "degreeCelsius", "values": [10, 25, 40, 60]},
-        ],
-        "columns": [
-            {
-                "name": "series_resistance_ohm",
-                "unit": "ohm",
-                "role": "series_resistance",
-                "pybamm_name": "R0 [Ohm]",
-            }
-        ],
-        "table": "params.ecm.csv",
+    "Parameterisation": {
+        "Cell": {
+            "Nominal cell capacity [A.h]": 4.5,
+            "Upper voltage cut-off [V]": 4.2,
+            "Lower voltage cut-off [V]": 2.5,
+            "Number of RC elements": 1,
+        },
+        "Circuit": {
+            "Open-circuit voltage [V]": {"x": [0.0, 1.0], "y": [3.0, 4.2]},
+            "R0 [Ohm]": 0.005,
+            "R1 [Ohm]": {
+                "x": [0.0, 1.0],
+                "y": [280.0, 320.0],
+                "z": [[0.003, 0.002], [0.002, 0.001]],
+            },
+            "C1 [F]": 1500.0,
+        },
     },
 }
 
 
 def test_packaged_schema_loads_and_has_expected_id():
     schema = load_ecm_schema()
-    assert schema["$id"].endswith("/schema/ecm-params/0.1")
-    assert "parameters" in schema["required"]
+    assert schema["$id"].endswith("/schema/ecm-params/0.2")
+    assert "Parameterisation" in schema["required"]
 
 
 def test_minimal_document_is_valid():
@@ -53,16 +47,34 @@ def test_minimal_document_is_valid():
 
 
 def test_missing_required_section_is_reported():
-    doc = {k: v for k, v in MINIMAL_ECM_PS.items() if k != "conventions"}
+    doc = {k: v for k, v in MINIMAL_ECM_PS.items() if k != "Header"}
     problems = ecm_ps_problems(doc)
-    assert problems and any("conventions" in p for p in problems)
+    assert problems and any("Header" in p for p in problems)
 
 
-def test_bad_axis_name_is_reported():
+def test_unknown_circuit_parameter_is_rejected():
     doc = json.loads(json.dumps(MINIMAL_ECM_PS))
-    doc["parameters"]["independent_variables"][0]["name"] = "soc_percent"
+    doc["Parameterisation"]["Circuit"]["Series resistance [Ohm]"] = 0.005
     problems = ecm_ps_problems(doc)
-    assert any("independent_variables" in p for p in problems)
+    assert any("Circuit" in p for p in problems)
+
+
+def test_expression_string_values_are_rejected():
+    doc = json.loads(json.dumps(MINIMAL_ECM_PS))
+    doc["Parameterisation"]["Circuit"]["R0 [Ohm]"] = "0.005 * exp(-x)"
+    problems = ecm_ps_problems(doc)
+    assert any("R0" in p for p in problems)
+
+
+def test_ocv_or_both_branches_is_required():
+    doc = json.loads(json.dumps(MINIMAL_ECM_PS))
+    circuit = doc["Parameterisation"]["Circuit"]
+    del circuit["Open-circuit voltage [V]"]
+    assert ecm_ps_problems(doc)  # no OCV at all
+    circuit["Open-circuit voltage on charge [V]"] = {"x": [0.0, 1.0], "y": [3.0, 4.2]}
+    assert ecm_ps_problems(doc)  # one branch only
+    circuit["Open-circuit voltage on discharge [V]"] = {"x": [0.0, 1.0], "y": [2.9, 4.1]}
+    assert ecm_ps_problems(doc) == []  # both branches
 
 
 def test_problem_strings_carry_the_ecm_prefix_and_a_path():

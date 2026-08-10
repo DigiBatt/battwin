@@ -39,7 +39,7 @@ Both functions return all problems from all requested layers rather than stoppin
 ```python
 from battwin.ecm import ecm_ps_problems, validate_ecm_ps_file
 
-problems = validate_ecm_ps_file("cell.ecm.json")   # list[str], empty = valid
+problems = validate_ecm_ps_file("cell.ecm-ps.json")  # list[str], empty = valid
 problems = ecm_ps_problems(doc)                    # for a parsed dict
 ```
 

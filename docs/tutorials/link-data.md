@@ -222,7 +222,7 @@ version chain: intact (b.previous == hash(a))
 
 $ battwin show p45b.v6.twin.json
 Molicel INR2170-P45B (id: urn:bte:molicel-inr2170-p45b:2026-08-10)
-  BTE 0.1.1 | version 6 <- sha256:747952b0a2d...
+  BTE 0.1.1 | version 6 <- sha256:a20a6d6aefe...
   battinfo record: https://w3id.org/battinfo/spec/ycek-4qa3-d4v3-rm6r
   models: p45b-2rc-ecm (About:Energy base set) [custom]
   state (2026-08-10): SoC 0%, SoH 95%
