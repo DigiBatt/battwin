@@ -8,8 +8,22 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
+- Twin a cell straight from its BattINFO IRI: `battwin init --from-battinfo
+  <IRI>` (and `battwin.envelope_from_battinfo()`) dereferences the registry
+  record and seeds `identity` and `specification` from it, with
+  `specification.battinfo_record` carrying the IRI. Standard library only --
+  no new dependencies; the registry's `"unknown"` placeholders become absent
+  fields, and `--label`/`--chemistry` override a sparse record. Verified
+  against the live registry (Molicel INR2170-P45B via w3id.org).
 - `python -m battwin ...` now runs the CLI, mirroring the `battwin` console
   script (new `battwin.__main__`).
+
+### Changed
+
+- The ruff lint ruleset is now pinned explicitly in `pyproject.toml`
+  (`E4/E7/E9/F/I`, the selection this codebase was written against): ruff
+  0.16 changed its defaults and an unpinned gate went red without any code
+  change.
 
 ### Fixed
 

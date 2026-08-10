@@ -8,6 +8,7 @@ with estimated state and a content-hash version chain.
 See SPEC.md for the specification and README.md for usage.
 """
 
+from .battinfo import envelope_from_battinfo, fetch_battinfo_record
 from .envelope import (
     BTE_VERSION,
     DataLink,
@@ -50,6 +51,8 @@ __all__ = [
     "Provenance",
     "VersionInfo",
     "new_envelope",
+    "envelope_from_battinfo",
+    "fetch_battinfo_record",
     "load",
     "save",
     "from_dict",

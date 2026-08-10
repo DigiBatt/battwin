@@ -53,12 +53,26 @@ def _cmd_hash(args: argparse.Namespace) -> int:
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
-    envelope = new_envelope(
-        label=args.label,
-        twin_id=args.id,
-        chemistry=args.chemistry,
-        created_by=args.created_by,
-    )
+    if args.from_battinfo:
+        from .battinfo import envelope_from_battinfo
+
+        envelope = envelope_from_battinfo(
+            args.from_battinfo,
+            label=args.label,
+            twin_id=args.id,
+            chemistry=args.chemistry,
+            created_by=args.created_by,
+        )
+    else:
+        if not args.label:
+            print("error: --label is required (or use --from-battinfo IRI)", file=sys.stderr)
+            return 2
+        envelope = new_envelope(
+            label=args.label,
+            twin_id=args.id,
+            chemistry=args.chemistry,
+            created_by=args.created_by,
+        )
     out = Path(args.out)
     save(envelope, out, jsonld=args.jsonld)
     print(f"wrote {out}")
@@ -117,7 +131,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=_cmd_hash)
 
     p = sub.add_parser("init", help="scaffold a minimal valid envelope")
-    p.add_argument("--label", required=True, help="human-readable name of the twinned battery")
+    p.add_argument(
+        "--label",
+        default=None,
+        help="human-readable name of the twinned battery (required unless "
+        "--from-battinfo supplies one; overrides the record's name if both given)",
+    )
+    p.add_argument(
+        "--from-battinfo",
+        default=None,
+        metavar="IRI",
+        help="seed identity and specification from a BattINFO record IRI, e.g. "
+        "https://w3id.org/battinfo/spec/<id> (the envelope references the "
+        "record; it does not copy it)",
+    )
     p.add_argument("--chemistry", default=None)
     p.add_argument("--id", default=None, help="twin identifier (URN/IRI); generated if omitted")
     p.add_argument("--created-by", default=None)
