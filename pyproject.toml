@@ -37,6 +37,7 @@ dev = [
   "types-jsonschema",
 ]
 shacl = ["pyshacl>=0.25"]
+sim = ["pybamm>=25.6,<27"]
 
 [project.scripts]
 battwin = "battwin.cli:main"
@@ -54,6 +55,14 @@ battwin = ["schemas/*.json", "context/*.jsonld", "shapes/*.ttl", "py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+# Optional runtime dependencies of the extras: not installed in the base dev
+# environment, and untyped anyway.
+module = ["pybamm.*", "pyshacl.*", "rdflib.*"]
+ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 100

@@ -37,3 +37,24 @@ jobs:
 
       - name: Test
         run: pytest -q
+
+  # One representative interpreter with the sim extra installed, so the
+  # PyBaMM-dependent side of every skip in test_sim.py is exercised too.
+  quality-sim:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (with sim extra)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,shacl,sim]"
+
+      - name: Test
+        run: pytest -q

@@ -8,6 +8,19 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
+- `battwin[sim]`: run a twin's ECM model binding in PyBaMM. `battwin.sim`
+  builds a `pybamm.equivalent_circuit.Thevenin` model from an ECM-PS payload
+  (`build_thevenin`) and runs experiments against it (`run_experiment`),
+  returning BDF-named columns (sign flipped to the BDF positive-= charging
+  convention) ready to attach to the envelope as data links and state
+  snapshots. Lookups are 2-D over (temperature, SoC) with per-temperature
+  grids resampled onto a common axis; OCV hysteresis branches are averaged
+  (PyBaMM-basic has a single OCV) with an explicit warning. The spec fence
+  is unchanged -- the format never specifies execution; this is a
+  convenience of the reference SDK. Verified end to end against the
+  About:Energy Molicel INR21700-P45B parameter release: 1C discharge, twin
+  version chain spec -> model -> simulated state.
+
 - ECM Parameter Set (ECM-PS) validation: battwin now packages the draft
   ECM-PS JSON Schema (`battwin/schemas/ecm-params.schema.json`, validation
   only -- battwin still never executes models) with a small API:
