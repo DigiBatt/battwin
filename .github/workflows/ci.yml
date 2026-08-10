@@ -38,9 +38,11 @@ jobs:
       - name: Test
         run: pytest -q
 
-  # One representative interpreter with the sim extra installed, so the
-  # PyBaMM-dependent side of every skip in test_sim.py is exercised too.
-  quality-sim:
+  # One representative interpreter with the sim and fit extras installed, so
+  # the PyBaMM/PyBOP-dependent side of every skip in test_sim.py and
+  # test_fit.py is exercised, and the combined [sim,fit] pins are proven to
+  # resolve jointly.
+  quality-sim-fit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,10 +53,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies (with sim extra)
+      - name: Install dependencies (with sim and fit extras)
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,shacl,sim]"
+          pip install -e ".[dev,shacl,sim,fit]"
 
       - name: Test
         run: pytest -q

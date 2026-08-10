@@ -10,5 +10,6 @@ from-battinfo
 verify-chain
 jsonld
 run-ecm
+fit-parameters
 contracts
 ```

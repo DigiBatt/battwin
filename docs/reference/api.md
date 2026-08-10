@@ -74,3 +74,10 @@ The public API is importable from the top-level `battwin` package; the modules b
 .. automodule:: battwin.sim
    :members:
 ```
+
+## `battwin.fit`: parameter identification (`battwin[fit]`)
+
+```{eval-rst}
+.. automodule:: battwin.fit
+   :members:
+```

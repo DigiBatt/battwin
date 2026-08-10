@@ -52,7 +52,7 @@ A `Header` field distinguishes the formats honestly: an ECM-PS file declares `"E
 }
 ```
 
-`Header` and `Parameterisation` are required; `State`, `Validation`, and `User-defined` are optional. `Circuit` requires `R0 [Ohm]` plus either a single `Open-circuit voltage [V]` or both hysteresis branches, and must define `R{i} [Ohm]` / `C{i} [F]` for every branch up to `Number of RC elements`. Unknown Circuit names are invalid; anything vendor-specific belongs in `User-defined`.
+`Header` and `Parameterisation` are required; `State`, `Validation`, and `User-defined` are optional. `Circuit` requires `R0 [Ohm]` plus either a single `Open-circuit voltage [V]` or both hysteresis branches, and must define `R{i} [Ohm]` / `C{i} [F]` for every branch up to `Number of RC elements`. Unknown Circuit names are invalid; anything vendor-specific belongs in `User-defined` — for example, [`battwin.fit`](../howto/fit-parameters.md) records its fit provenance there under the `"pybop"` key.
 
 ## Values
 

@@ -231,4 +231,6 @@ Molicel INR2170-P45B (id: urn:bte:molicel-inr2170-p45b:2026-08-10)
 
 Across the three tutorials, one twin went registry record → bench state → open ECM → simulated state → measured data → measured state: six immutable documents, each content-hashed against the last, with every state estimate naming its method and its source dataset. The simulated snapshot did not disappear when the measured one arrived; it moved into `state_history`, so the twin remembers both what the model predicted and what the lab measured.
 
+The twin now knows its model misses by 77 mV and why. In the final tutorial it does something about it: PyBOP fits the model against this very measurement, and the calibrated model joins the chain: [Fit the model to your cell](fit-model.md).
+
 To go deeper: [anatomy of an envelope](../explanation/envelope.md) on the `data[]` and `state_history` sections, [how the validation layers fit together](../explanation/validation.md), and [battfeed](https://github.com/DigiBatt/battfeed) for doing step 3 at the cycler instead of by hand.

@@ -27,6 +27,7 @@ The core package depends on `pydantic` and `jsonschema`, nothing else. Optional 
 |---|---|---|
 | `battwin[shacl]` | pyshacl | a third, SHACL-based validation layer over the JSON-LD rendering |
 | `battwin[sim]` | PyBaMM | running a twin's equivalent-circuit model as a PyBaMM simulation |
+| `battwin[fit]` | PyBOP | fitting a model's parameters against the measured data a twin links |
 | `battwin[dev]` | pytest, ruff, mypy | the development toolchain |
 
 ## Documentation

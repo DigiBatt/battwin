@@ -38,6 +38,7 @@ dev = [
 ]
 shacl = ["pyshacl>=0.25"]
 sim = ["pybamm>=25.6,<27"]
+fit = ["pybop>=26.3,<27", "pybamm>=25.6,<27"]
 docs = [
   "sphinx>=8",
   "myst-parser>=4",
@@ -70,7 +71,7 @@ testpaths = ["tests"]
 [[tool.mypy.overrides]]
 # Optional runtime dependencies of the extras: not installed in the base dev
 # environment, and untyped anyway.
-module = ["numpy.*", "pybamm.*", "pyshacl.*", "rdflib.*"]
+module = ["numpy.*", "pybamm.*", "pybop.*", "pyshacl.*", "rdflib.*"]
 ignore_missing_imports = true
 
 [tool.ruff]

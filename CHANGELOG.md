@@ -28,6 +28,20 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
+- `battwin[fit]`: fit a twin's ECM parameters against the measured data it
+  links, via PyBOP (>=26.3). `battwin.fit.fit_thevenin` identifies named R/C
+  circuit parameters as constants (driving the model with the measured
+  current profile, RMS voltage cost, SciPyMinimize), returning a new
+  schema-valid ECM-PS document with the fitted values in place and full fit
+  provenance (optimiser, initial/fitted values, residuals, conditions,
+  source-data URI) recorded under `User-defined.pybop`; `read_bdf` loads a
+  linked BDF file's columns. Table values replaced by fitted constants are
+  surfaced as warnings, OCV curves are not fittable by design, and the CI
+  extras job now proves the combined `[sim,fit]` install resolves. Verified
+  end to end against the P45B tutorial chain: fitting R0 to the measured 1C
+  discharge (6.6 -> 18.7 mOhm, an aged cell's effective resistance) cut the
+  model-vs-measurement error from 77 to 56 mV RMSE.
+
 - `examples/p45b/`: the About:Energy release for the Molicel INR21700-P45B
   (Zenodo 10.5281/zenodo.19052626, CC-BY-4.0, attribution in the folder
   README) as tutorial material: the ECM converted to the draft ECM-PS format,
