@@ -102,9 +102,9 @@ def build_thevenin(
     tables have slightly different SoC points at each temperature), and every
     R/C interpolant ignores the current argument (2-D lookup).
     """
-    import numpy as np
-
     pybamm = _require_pybamm()
+    import numpy as np  # a pybamm dependency: guaranteed present once pybamm is
+
     warnings: list[str] = []
 
     axes = {a.get("name") for a in ecm_ps.get("parameters", {}).get("independent_variables", [])}
