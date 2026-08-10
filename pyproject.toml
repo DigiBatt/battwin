@@ -76,6 +76,10 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 100
+# Docs code blocks are teaching material (aligned comments, elided output);
+# newer ruff releases format markdown code blocks by default. Keep the gate
+# scoped to real source, same doctrine as the pinned lint ruleset below.
+exclude = ["docs"]
 
 [tool.ruff.lint]
 # Pinned to the ruleset this codebase was written against (the pre-0.16 ruff
