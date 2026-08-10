@@ -39,9 +39,12 @@ dev = [
 shacl = ["pyshacl>=0.25"]
 sim = ["pybamm>=25.6,<27"]
 docs = [
-  "mkdocs-material>=9.5,<10",
-  "mkdocstrings[python]>=0.26",
-  "ruff",  # formats signatures on the API reference page
+  "sphinx>=8",
+  "myst-parser>=4",
+  "pydata-sphinx-theme>=0.16",
+  "sphinx-design>=0.6",
+  "sphinx-copybutton>=0.5",
+  "autodoc-pydantic>=2.2",
 ]
 
 [project.scripts]

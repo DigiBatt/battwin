@@ -1,6 +1,6 @@
-# BattINFO integration
+# Scaffold a twin from a BattINFO record
 
-If the cell you are twinning already has a record in the BattINFO registry, you can scaffold the envelope directly from its IRI instead of copying fields by hand. The envelope *references* the record; it does not duplicate it.
+If the cell you are twinning has a record in the BattINFO registry, seed the envelope from its IRI instead of typing the identity by hand. The envelope *references* the record; it does not duplicate it.
 
 ## From the command line
 
@@ -16,11 +16,11 @@ from battwin import envelope_from_battinfo
 env = envelope_from_battinfo("https://w3id.org/battinfo/spec/<id>")
 ```
 
-There is also `fetch_battinfo_record(iri)` if you just want the dereferenced JSON record.
+Use `fetch_battinfo_record(iri)` if you just want the dereferenced JSON record.
 
 ## What gets mapped
 
-The helper dereferences the IRI (following redirects, standard library only, no new dependencies) and seeds the envelope from the record:
+The helper dereferences the IRI (following redirects, standard library only) and seeds the envelope:
 
 - `identity`: the record's product name becomes `label`, along with manufacturer, model, and serial number where present;
 - `specification.battinfo_record` carries the IRI itself, so the link back to the registry is explicit;
@@ -29,6 +29,6 @@ The helper dereferences the IRI (following redirects, standard library only, no 
 Two behaviors worth knowing:
 
 - the registry's `"unknown"` placeholder values become *absent* fields rather than the literal string `"unknown"`;
-- `--label` and `--chemistry` (or the corresponding keyword arguments) override what the record says, which is useful when a record is sparse or when you want a bench-specific label.
+- `--label` and `--chemistry` (or the corresponding keyword arguments) override what the record says, useful when a record is sparse or when you want a bench-specific label.
 
 If the record supplies no label and you pass none, initialization fails with a clear error, because `identity.label` is required.

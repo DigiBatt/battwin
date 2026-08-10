@@ -8,9 +8,12 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
-- Documentation site at https://digibatt.github.io/battwin/ (MkDocs Material,
-  built from `docs/` and `SPEC.md`, deployed to GitHub Pages on every push to
-  `main`; build locally with `pip install -e ".[docs]" && mkdocs serve`).
+- Documentation site at https://digibatt.github.io/battwin/ (Sphinx with MyST
+  Markdown and the pydata theme, structured along Diátaxis lines: tutorials,
+  how-to guides, reference, explanation; `SPEC.md` and `CHANGELOG.md` are
+  rendered into the site from the repository root). Deployed to GitHub Pages
+  on every push to `main`; build locally with `pip install -e ".[docs]" &&
+  sphinx-build -W -b html docs site`.
 
 - `battwin[sim]`: run a twin's ECM model binding in PyBaMM. `battwin.sim`
   builds a `pybamm.equivalent_circuit.Thevenin` model from an ECM-PS payload

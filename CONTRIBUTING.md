@@ -20,11 +20,11 @@ pytest -q
 
 ## Documentation
 
-The docs site is built with MkDocs Material and deployed to GitHub Pages on every push to `main`. To preview locally:
+The docs site is built with Sphinx (MyST Markdown, pydata theme), structured along [Diátaxis](https://diataxis.fr/) lines (tutorials / how-to / reference / explanation), and deployed to GitHub Pages on every push to `main`. `SPEC.md`, `CHANGELOG.md`, and this file are rendered into the site from the repository root, so edit them here, not under `docs/`. To build locally:
 
 ```bash
 pip install -e ".[docs]"
-mkdocs serve
+sphinx-build -W -b html docs site
 ```
 
 ## Pull request checklist

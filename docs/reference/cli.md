@@ -34,7 +34,7 @@ Scaffolds a minimal valid envelope. Options:
 | Option | Meaning |
 |---|---|
 | `--label` | human-readable name of the twinned battery; required unless `--from-battinfo` supplies one, and overrides the record's name if both are given |
-| `--from-battinfo IRI` | seed `identity` and `specification` from a BattINFO record IRI ([details](battinfo.md)); the envelope references the record, it does not copy it |
+| `--from-battinfo IRI` | seed `identity` and `specification` from a BattINFO record IRI ([details](../howto/from-battinfo.md)); the envelope references the record, it does not copy it |
 | `--chemistry` | convenience `specification.chemistry` value |
 | `--id` | twin identifier (URN or IRI); generated if omitted |
 | `--created-by` | `provenance.created_by` |
@@ -55,7 +55,7 @@ Prints a human-readable summary of an envelope.
 battwin hash FILE
 ```
 
-Prints the content hash (`sha256:...`) of an envelope in its canonical form. See [versioning and hashing](versioning.md).
+Prints the content hash (`sha256:...`) of an envelope in its canonical form. See [versioning and immutability](../explanation/versioning.md).
 
 ### `battwin diff`
 

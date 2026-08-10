@@ -11,49 +11,64 @@ BDF datasets & feeds ─┘  (models & data, by reference)               platfor
                                                                      archives
 ```
 
-Envelopes are **documents, not engines**: how a twin is hosted, simulated, or synchronized is an implementation concern; how it is *expressed* is a community concern. The full format is defined in the [specification](spec.md).
+Envelopes are **documents, not engines**: how a twin is hosted, simulated, or synchronized is an implementation concern; how it is *expressed* is a community concern. The full format is defined in the [specification](reference/specification.md).
 
-## In thirty seconds
+## Installation
+
+battwin requires Python 3.10 or newer.
 
 ```bash
 pip install battwin
 ```
 
-```python
-from battwin import new_envelope, save, validate_file
+The core package depends on `pydantic` and `jsonschema`, nothing else. Optional capability lives behind extras, so a bare install never pulls in a solver:
 
-twin = new_envelope(label="Bench cell 001", chemistry="LFP")
-save(twin, "bench-cell-001.twin.json")
-assert validate_file("bench-cell-001.twin.json") == []
-```
+| Extra | Installs | Adds |
+|---|---|---|
+| `battwin[shacl]` | pyshacl | a third, SHACL-based validation layer over the JSON-LD rendering |
+| `battwin[sim]` | PyBaMM | running a twin's equivalent-circuit model as a PyBaMM simulation |
+| `battwin[dev]` | pytest, ruff, mypy | the development toolchain |
 
-Updating a twin never mutates it. Each update is a new document whose `version.previous` field holds the content hash of its predecessor, so any consumer can verify the lineage. The [versioning guide](guide/versioning.md) walks through the chain.
+## Documentation
 
-## Where to go next
+The documentation follows the [Diátaxis](https://diataxis.fr/) model: pick the section that matches what you need right now.
 
-<div class="grid cards" markdown>
+::::{grid} 1 1 2 2
+:gutter: 3
 
--   :material-rocket-launch-outline: **[Getting started](getting-started.md)**
+:::{grid-item-card} 🎓 Tutorials
+:link: tutorials/index
+:link-type: doc
 
-    Install the package, create your first envelope from Python or the command line, and understand the optional extras.
+Learning-oriented lessons. Start here: create your first twin, validate it, and grow its version chain step by step.
+:::
 
--   :material-file-document-outline: **[The twin envelope](guide/envelope.md)**
+:::{grid-item-card} 🛠 How-to guides
+:link: howto/index
+:link-type: doc
 
-    A guided tour of every section of a `.twin.json` document, with a complete worked example.
+Task-oriented recipes: validate documents, scaffold from BattINFO, render JSON-LD, run an ECM simulation, verify a chain.
+:::
 
--   :material-book-open-variant: **[Specification](spec.md)**
+:::{grid-item-card} 📖 Reference
+:link: reference/index
+:link-type: doc
 
-    The normative BTE format definition: document model, versioning rules, conformance, and JSON-LD rendering.
+Information-oriented: the normative BTE specification, the CLI, the full Python API, and the changelog.
+:::
 
--   :material-code-braces: **[API reference](api.md)**
+:::{grid-item-card} 💡 Explanation
+:link: explanation/index
+:link-type: doc
 
-    The full Python API: envelope models, I/O, validation, BattINFO helpers, ECM parameter sets, and simulation.
+Understanding-oriented: why envelopes are documents rather than engines, how immutability and the three validation layers fit together.
+:::
 
-</div>
+::::
 
 ## What battwin is not
 
-battwin deliberately does **not** host twins, define sync or REST protocols, manage fleets or tenants, or acquire measurement data (that is [battfeed](https://github.com/DigiBatt/battfeed)'s job). It composes BattINFO, BPX, and BDF by reference rather than replacing them. The reference SDK does ship an optional [`battwin[sim]` extra](guide/ecm-sim.md) that can run a twin's equivalent-circuit model in PyBaMM as a convenience, but the *format* never specifies execution.
+battwin deliberately does **not** host twins, define sync or REST protocols, manage fleets or tenants, or acquire measurement data (that is [battfeed](https://github.com/DigiBatt/battfeed)'s job). It composes BattINFO, BPX, and BDF by reference rather than replacing them. The [design principles](explanation/design.md) page explains where the lines are drawn and why.
 
 ## Related projects
 
@@ -66,8 +81,21 @@ battwin deliberately does **not** host twins, define sync or REST protocols, man
 
 ## Acknowledgements
 
-<img src="assets/img/Flag_of_Europe.png" alt="EU flag" width="100">
+```{image} assets/img/Flag_of_Europe.png
+:alt: EU flag
+:width: 100px
+```
 
 This project has received support from European Union research and innovation programs under grant agreement [101103997 – DigiBatt](https://digibattproject.eu/).
 
 battwin is Apache-2.0 licensed. See [LICENSE](https://github.com/DigiBatt/battwin/blob/main/LICENSE) and [NOTICE](https://github.com/DigiBatt/battwin/blob/main/NOTICE).
+
+```{toctree}
+:hidden:
+
+tutorials/index
+howto/index
+reference/index
+explanation/index
+project/index
+```
