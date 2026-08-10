@@ -61,7 +61,7 @@ testpaths = ["tests"]
 [[tool.mypy.overrides]]
 # Optional runtime dependencies of the extras: not installed in the base dev
 # environment, and untyped anyway.
-module = ["pybamm.*", "pyshacl.*", "rdflib.*"]
+module = ["numpy.*", "pybamm.*", "pyshacl.*", "rdflib.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
