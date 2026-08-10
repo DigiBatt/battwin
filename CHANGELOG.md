@@ -8,11 +8,14 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
-- `examples/p45b/`: the About:Energy ECM parameter release for the Molicel
-  INR21700-P45B (Zenodo 10.5281/zenodo.19052626, CC-BY-4.0, attribution in the
-  folder README) converted to the draft ECM-PS format, powering the hands-on
-  documentation tutorials (twin from the live registry record → attach ECM →
-  1C PyBaMM discharge → hash-chained versions, with real outputs shown).
+- `examples/p45b/`: the About:Energy release for the Molicel INR21700-P45B
+  (Zenodo 10.5281/zenodo.19052626, CC-BY-4.0, attribution in the folder
+  README) as tutorial material: the ECM converted to the draft ECM-PS format,
+  plus the measured 1C/25 °C validation discharge converted to BDF column
+  naming. These power the hands-on documentation tutorials (twin from the
+  live registry record → attach ECM → 1C PyBaMM discharge → link measured
+  data → coulomb-counted SoH → hash-chained versions, with real outputs and
+  a measured-vs-simulated comparison, RMSE 77 mV).
 - Documentation site at https://digibatt.github.io/battwin/ (Sphinx with MyST
   Markdown and the pydata theme, structured along Diátaxis lines: tutorials,
   how-to guides, reference, explanation; `SPEC.md` and `CHANGELOG.md` are

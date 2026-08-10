@@ -164,6 +164,6 @@ Note `state_history` in the changed sections: the fresh-cell snapshot from the p
 
 ## 7. What you just demonstrated
 
-Across the two tutorials, one twin went registry record → identity → bench state → open ECM → simulated state, in four immutable documents, each content-hashed against the last. Every ingredient is open: the BattINFO record, the CC-BY parameter set, the ECM-PS format, PyBaMM, and the envelope itself. Anyone you hand the four files to can re-verify the chain with `battwin diff`, re-run the model with `battwin.sim`, or load the whole thing into tooling that has never heard of Python, via the [published contracts](../howto/contracts.md).
+The twin now spans registry record → identity → bench state → open ECM → simulated state, in four immutable documents, each content-hashed against the last. Every ingredient is open: the BattINFO record, the CC-BY parameter set, the ECM-PS format, PyBaMM, and the envelope itself. Anyone you hand the four files to can re-verify the chain with `battwin diff`, re-run the model with `battwin.sim`, or load the whole thing into tooling that has never heard of Python, via the [published contracts](../howto/contracts.md).
 
-That is battwin's claim in miniature: the twin is not an account in someone's platform, it is a document you hold.
+But a simulation is only a claim. In the final tutorial the twin meets the lab: you will link the *measured* discharge behind this very parameter set, estimate the cell's health from it, and let the twin quantify how well its model matches reality: [Link measured data to the twin](link-data.md).

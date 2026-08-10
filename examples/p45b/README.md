@@ -4,6 +4,7 @@ An ECM Parameter Set for the Molicel INR21700-P45B cylindrical cell, used by the
 
 - `molicel-p45b-2rc.ecm-ps.json` — a 2-RC Thevenin equivalent-circuit model in the draft ECM-PS format: topology, sign conventions, cell limits, and column definitions, validated by `battwin.ecm`.
 - `molicel-p45b-2rc.params.ecm.csv` — the parameter lookup table the document references: 839 rows over state of charge at 10, 25, 40, and 60 °C.
+- `p45b-measured-1c-25degC.bdf.csv` — the release's measured 1C constant-current discharge at 25 °C (`MOLICEL_P45B_025degC_1C_Dch.csv`), converted to BDF column naming with the measurement columns only, as done in the "Link measured data" tutorial.
 
 ## Attribution
 
