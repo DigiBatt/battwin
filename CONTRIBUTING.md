@@ -6,16 +6,25 @@
 2. Install development dependencies:
 
 ```bash
-pip install -e ".[dev,bdf,viz]"
+pip install -e ".[dev,shacl]"
 ```
 
 ## Common commands
 
 ```bash
 ruff check .
-black --check .
+ruff format --check .
 mypy src
-pytest
+pytest -q
+```
+
+## Documentation
+
+The docs site is built with MkDocs Material and deployed to GitHub Pages on every push to `main`. To preview locally:
+
+```bash
+pip install -e ".[docs]"
+mkdocs serve
 ```
 
 ## Pull request checklist

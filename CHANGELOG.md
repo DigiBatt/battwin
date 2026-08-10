@@ -8,6 +8,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
+- Documentation site at https://digibatt.github.io/battwin/ (MkDocs Material,
+  built from `docs/` and `SPEC.md`, deployed to GitHub Pages on every push to
+  `main`; build locally with `pip install -e ".[docs]" && mkdocs serve`).
+
 - `battwin[sim]`: run a twin's ECM model binding in PyBaMM. `battwin.sim`
   builds a `pybamm.equivalent_circuit.Thevenin` model from an ECM-PS payload
   (`build_thevenin`) and runs experiments against it (`run_experiment`),

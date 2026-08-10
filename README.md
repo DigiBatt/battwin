@@ -20,6 +20,8 @@ Envelopes are **documents, not engines**: how a twin is hosted, simulated, or
 synchronized is an implementation concern; how it is expressed is a community
 concern. The full format is defined in [SPEC.md](SPEC.md).
 
+**Documentation:** [digibatt.github.io/battwin](https://digibatt.github.io/battwin/)
+
 ## Installation
 
 ```bash
