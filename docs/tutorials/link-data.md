@@ -20,7 +20,7 @@ unzip molicel_p45b_data.zip MOLICEL_P45B_025degC_1C_Dch.csv
 The converted result of steps 1–3, `p45b-measured-1c-25degC.bdf.csv`, ships in [`examples/p45b/`](https://github.com/DigiBatt/battwin/tree/main/examples/p45b) — copy it into your working directory and jump to step 4.
 ```
 
-The data is CC-BY-4.0: cite the dataset DOI ([10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626)) if you use it beyond this tutorial.
+The data is CC-BY-4.0: cite the dataset DOI ([10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626)) if you use it beyond this tutorial. The test matrix and methods behind these measurements are described in the release's accompanying paper, [Dickinson et al. (SSRN 6861858)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858), §4 and §6.
 
 ## 2. Look at what you downloaded
 
@@ -211,6 +211,8 @@ Measured vs simulated terminal voltage for the same 1C discharge, plotted from t
 ```
 
 The curves track within tens of millivolts for most of the discharge, and then diverge exactly where you would expect a simplified model to struggle: at the end-of-discharge knee, where the averaged OCV (remember the hysteresis warning from the previous tutorial) and the model's SoC floor bite. The measured cell hits 2.5 V at 57 minutes with 4.29 Ah delivered; the simulation coasts to its SoC floor at 60 minutes. This is the quiet payoff of linking measured data: the twin becomes its own model critic, with the evidence attached.
+
+For calibration of that criticism: [Dickinson et al.](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858) report 17.3 mV RMS error for this very test, but under their metric (down to 10% SoC) and with the full hysteresis model. Most of the gap between their 17.3 mV and our 77 mV is battwin's averaged-OCV projection — the branch half-gap averages ~29 mV over that SoC range on this SiOx-anode cell — plus the sub-10%-SoC region their metric excludes. Substituting the discharge branch as the single OCV, battwin's simulation reproduces their 17.3 mV exactly, so the twin carries the paper's model faithfully; the projection is a runtime choice, not a data loss.
 
 ## 7. Where you are now
 

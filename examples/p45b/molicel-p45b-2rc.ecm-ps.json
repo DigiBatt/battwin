@@ -5,7 +5,8 @@
   "Title": "Molicel INR21700-P45B 2-RC equivalent-circuit model (About:Energy base set)",
   "Description": "Converted from the About:Energy data release for the Molicel INR21700-P45B (base parameter set). Lookup grids were resampled onto the 25 degC SoC axis by linear interpolation so all temperatures share one grid; temperatures converted to Kelvin; values otherwise unchanged.",
   "References": [
-   "About:Energy Ltd, Data Release - Industry-Standard Parameter Set, Validation Data and Validation Reporting for an Equivalent Circuit Model of the Molicel INR21700-P45B Cylindrical Cell, Zenodo, DOI 10.5281/zenodo.19052626 (CC-BY-4.0)"
+   "About:Energy Ltd, Data Release - Industry-Standard Parameter Set, Validation Data and Validation Reporting for an Equivalent Circuit Model of the Molicel INR21700-P45B Cylindrical Cell, Zenodo, DOI 10.5281/zenodo.19052626 (CC-BY-4.0)",
+   "E. J. F. Dickinson, C. Zor, D. Doyle, C. Pilling, K. Lukow, K. O'Regan, M. Blyth, A. Hales, G. White, An Industry-Standard Parameterisation of a Lithium-Ion Battery Equivalent Circuit Model for a High-Power Cylindrical Cell: Molicel P45B, preprint (under review), SSRN, https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858"
   ],
   "BattINFO record": "https://w3id.org/battinfo/spec/ycek-4qa3-d4v3-rm6r"
  },

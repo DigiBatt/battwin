@@ -1,6 +1,6 @@
 # Fit the model to your cell
 
-This tutorial continues [Link measured data to the twin](link-data.md). Your P45B twin ends that tutorial at version 6 knowing two uncomfortable facts: its measured state of health is 95%, and its vendor parameter set misses the measured discharge by 77 mV RMSE. A generic datasheet model describes the *cell type*; your twin mirrors *one physical cell*. In this tutorial the twin closes that gap itself: PyBOP fits a model parameter against the measurement the twin links, and the calibrated model joins the version chain — ending with the comparison figure below.
+This tutorial continues [Link measured data to the twin](link-data.md). Your P45B twin ends that tutorial at version 6 knowing an uncomfortable fact: as battwin simulates it, its model misses the measured discharge by 77 mV RMSE — partly the runtime's own single-OCV projection, partly what any constant-current trace hides. Whatever the cause, the twin links the evidence to fix it. In this tutorial the twin closes the gap itself: PyBOP fits a model parameter against the measurement the twin links, and the calibrated model joins the version chain — ending with the comparison figure below.
 
 As before, every output shown is from a real run (2026-08-10, battwin 0.4.0, PyBOP 26.3).
 
@@ -51,7 +51,7 @@ rmse over the measured discharge: 77.6 mV -> 55.6 mV
 Three things in that output deserve attention:
 
 - **The warning is the format being honest.** The vendor document carries R0 as a 2-D table over SoC and temperature; a fit against one discharge cannot reproduce a surface, so the fitted document carries a *constant* R0 instead, and battwin says so out loud. Everything else (the OCV branches, the RC tables) stays untouched.
-- **The fitted value is physics, not noise.** R0 moved from the vendor's 6.6 mΩ to 18.7 mΩ — an *effective* resistance that absorbs both the DC lumping of the RC branches and the real aging of this specific cell (remember its coulomb-counted SoH of 95%). It landed well inside the fit bounds.
+- **The fitted value is diagnosable, not noise.** R0 moved from the vendor's 6.6 mΩ to 18.7 mΩ, landing well inside the fit bounds. Decomposed against [Dickinson et al.](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858)'s parameters, that value is almost entirely accounted for: ~10.7 mΩ is the DC lumping of the R1/R2 branches into one constant (the vendor's total 25 °C resistance is 17.3 mΩ), and most of the rest (~6.5 mΩ ≈ 29 mV ÷ 4.5 A) compensates battwin's averaged-OCV hysteresis projection, which reads high on a discharge. Little is left over for aging. A fit will happily absorb *your model's* biases along with the cell's physics; knowing which is which takes exactly the kind of source comparison this bullet just did.
 - **Why only R0?** A smooth constant-current discharge cannot separate series resistance from the slow RC branches — ask it to fit all five R/C parameters and the optimiser happily slides R0 to a bound while inflating R2, trading one for the other. Full identification wants dynamic data (pulses, GITT — which the About:Energy release also contains). `fit_thevenin` will fit whatever you name; naming only what your data can identify is your job. See [Fit ECM parameters](../howto/fit-parameters.md).
 
 ## 3. Commit the calibrated model as version 7
@@ -119,7 +119,7 @@ fitted set vs measured: RMSE 55.6 mV
 Measured vs the vendor parameter set vs the calibrated model, for the same 1C discharge. Fitting one parameter against the linked measurement cut the voltage error from 77 to 56 mV RMSE.
 ```
 
-The calibrated model hugs the measured curve through the bulk of the discharge, where the vendor set reads consistently high. The remaining error is concentrated at the end-of-discharge knee, and fitting resistance can never fix that part: the knee timing is a *capacity* effect (the measured cell delivered 4.29 Ah against the model's 4.5), which is the same story the twin's SoH snapshot already tells. Each version of this twin has been telling one consistent story from a different angle.
+The calibrated model hugs the measured curve through the bulk of the discharge, where the as-simulated vendor set reads consistently high (that offset is mostly the averaged-OCV projection sitting above the discharge branch the cell actually follows). The remaining error is concentrated at the end-of-discharge knee, and fitting resistance can never fix that part: the knee timing is a *capacity* effect (the measured cell delivered 4.29 Ah against the model's 4.5), which is the same story the twin's SoH snapshot already tells. Each version of this twin has been telling one consistent story from a different angle.
 
 ## 5. What you just demonstrated
 

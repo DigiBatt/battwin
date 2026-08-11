@@ -18,7 +18,7 @@ Copy [`molicel-p45b-2rc.ecm-ps.json`](https://github.com/DigiBatt/battwin/blob/m
 
 It is a single self-contained document in the draft **ECM-PS** format: a 2-RC Thevenin model whose parameters (both OCV hysteresis branches, R0, R1/C1, R2/C2, entropic coefficient) are 2-D interpolated tables over state of charge and temperature, 210 SoC points at four temperatures. If you have seen a [BPX](https://github.com/FaradayInstitution/BPX) file, the shape will feel familiar — `Header` and `Parameterisation` sections, natural-language parameter names with bracketed SI units — which is deliberate: ECM-PS is styled after BPX so the two stay as interoperable as possible, even though BPX itself has no ECM model type yet. The format details are in the [ECM-PS reference](../reference/ecm-ps.md).
 
-The parameter values come from About:Energy's data release for the INR21700-P45B ([Zenodo, 10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626), CC-BY-4.0); cite that DOI if you use them beyond this tutorial. Note the document's `Header` carries a `BattINFO record` IRI: the same registry IRI your twin was scaffolded from. The model and the twin agree about which cell they describe.
+The parameter values come from About:Energy's data release for the INR21700-P45B ([Zenodo, 10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626), CC-BY-4.0), whose model, characterisation, and validation are described in the accompanying paper by [Dickinson et al. (SSRN 6861858)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858). Cite the dataset DOI (and the paper, for the methodology) if you use them beyond this tutorial; both citations also travel inside the document itself, in `Header.References`. Note the `Header` also carries a `BattINFO record` IRI: the same registry IRI your twin was scaffolded from. The model and the twin agree about which cell they describe.
 
 ## 3. Attach the model as version 3
 
@@ -127,7 +127,7 @@ final SoC: -0.000
 
 Read that output closely, because each line is telling you something real:
 
-- **The warning is a deliberate approximation being surfaced.** The About:Energy set carries separate charge/discharge OCV branches; PyBaMM's basic Thevenin model has a single OCV, so their mean is used. The branches stay untouched inside the twin's ECM-PS for solvers that can use them.
+- **The warning is a deliberate approximation being surfaced.** The About:Energy model uses Plett one-state OCV hysteresis with separate charge/discharge branches ([Dickinson et al., §3.1](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858)); PyBaMM's basic Thevenin model has a single OCV, so their mean is used. The branches stay untouched inside the twin's ECM-PS for solvers that can use them — and this projection has a measurable cost you will see in the next tutorial.
 - **The physics checks out.** A 4.5 Ah cell discharged at 1C (4.5 A) lasts almost exactly one hour: 3600 s, 4.167 V down to 2.619 V. The run ends when the model's SoC hits its floor, at 2.62 V, just above the 2.5 V cut-off (PyBaMM reports this as a "Minimum SoC" event during the experiment; that message is expected).
 - **The output is exchange-ready.** The CSV columns are BDF-named (`test_time_second`, `voltage_volt`, ...) and the current is `-4.50 A` throughout: negative because BDF's sign convention is positive-equals-charging, and battwin flipped PyBaMM's load-positive sign for you.
 

@@ -77,7 +77,7 @@ from battwin.sim import build_thevenin            # battwin[sim]: execution
 assert validate_ecm_ps_file("cell.ecm-ps.json") == []
 ```
 
-See [Run an ECM simulation](../howto/run-ecm.md) for the execution side, and [`examples/p45b/`](https://github.com/DigiBatt/battwin/tree/main/examples/p45b) for a complete real-world document (the About:Energy Molicel INR21700-P45B release, converted).
+See [Run an ECM simulation](../howto/run-ecm.md) for the execution side, and [`examples/p45b/`](https://github.com/DigiBatt/battwin/tree/main/examples/p45b) for a complete real-world document: the About:Energy Molicel INR21700-P45B release ([Zenodo 10.5281/zenodo.19052626](https://doi.org/10.5281/zenodo.19052626), CC-BY-4.0), converted — the model and its validation are described in [Dickinson et al. (SSRN 6861858)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6861858), and both citations travel in the document's `Header.References`. That example also demonstrates the intended use of `References`: a parameter set should carry its own literature.
 
 ## Relationship to the twin envelope
 
