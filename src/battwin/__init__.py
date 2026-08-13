@@ -37,7 +37,7 @@ try:
 
     __version__ = _pkg_version("battwin")
 except Exception:  # pragma: no cover
-    __version__ = "0.4.0"
+    __version__ = "0.4.1"
 
 __all__ = [
     "BTE_VERSION",
